@@ -2,10 +2,6 @@ use std::{env, thread, time};
 use sysinfo::System;
 
 fn main() {
-    let ports = serialport::available_ports().expect("No ports found!");
-    for p in ports {
-        println!("{:?}", p);
-    }
     let mut sys = System::new();
 
     /* parse port from command line arguments */
@@ -30,7 +26,7 @@ fn main() {
 
         let usage = sys.global_cpu_info().cpu_usage();
         serial
-            .write(&usage.to_be_bytes())
+            .write(&usage.to_le_bytes())
             .expect("[ERR] write failed");
     }
 }
