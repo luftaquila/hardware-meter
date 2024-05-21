@@ -1,10 +1,22 @@
 use std::{env, thread, time};
+
 use sysinfo::System;
+use tray_item::{IconSource, TrayItem};
 
 fn main() {
-    let mut sys = System::new();
+    /* create tray icon */
+    let mut tray = TrayItem::new(
+        "cpu-meter @luftaquila\ngithub.com/luftaquila/cpu-meter",
+        IconSource::Resource("tray-default"),
+    )
+    .unwrap();
 
-    /* parse port from command line arguments */
+    tray.add_menu_item("Quit", || {
+        std::process::exit(0);
+    })
+    .unwrap();
+
+    /* get port from argument */
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
@@ -18,10 +30,12 @@ fn main() {
         .open()
         .expect("[ERR] cannot open port");
 
+    /* get cpu usage and write it to serial */
+    let mut sys = System::new();
     sys.refresh_cpu_usage();
 
     loop {
-        thread::sleep(time::Duration::from_millis(100));
+        thread::sleep(time::Duration::from_millis(200));
         sys.refresh_cpu_usage();
 
         let usage = sys.global_cpu_info().cpu_usage();

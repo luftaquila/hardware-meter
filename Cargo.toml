@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 sysinfo = "0.30"
 serialport = "4.3"
+tray-item = "0.10"
+
+[build-dependencies]
+embed-resource = "2.3"
