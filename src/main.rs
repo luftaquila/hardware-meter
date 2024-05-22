@@ -1,4 +1,6 @@
-use std::{env, thread, time};
+#![windows_subsystem = "windows"]
+
+use std::{sync::mpsc, thread, time};
 
 use sysinfo::System;
 use tray_item::{IconSource, TrayItem};
@@ -11,36 +13,80 @@ fn main() {
     )
     .unwrap();
 
+    tray.add_menu_item("About", || {
+        open::that("https://github.com/luftaquila/cpu-meter").expect("[ERR] Cannot open browser");
+    })
+    .unwrap();
+
+    tray.inner_mut().add_separator().unwrap();
+    // tray.inner_mut().add_menu_item("Refresh", || {}).unwrap();
+
+    let (tx, rx) = mpsc::channel();
+
+    let ports = serialport::available_ports().expect("[ERR] No ports found!");
+    for p in ports {
+        let name = p.port_name.clone();
+        let tx = tx.clone();
+
+        tray.inner_mut()
+            .add_menu_item(&p.port_name, move || {
+                tx.send(name.clone()).unwrap();
+            })
+            .unwrap();
+    }
+    tray.inner_mut().add_separator().unwrap();
+
     tray.add_menu_item("Quit", || {
         std::process::exit(0);
     })
     .unwrap();
 
-    /* get port from argument */
-    let args: Vec<String> = env::args().collect();
-
-    if args.len() < 2 {
-        eprintln!("[ERR] no port specified");
-        return;
-    }
-
-    let port = &args[1];
-    let mut serial = serialport::new(port, 115200)
-        .timeout(time::Duration::from_millis(10))
-        .open()
-        .expect("[ERR] cannot open port");
-
-    /* get cpu usage and write it to serial */
-    let mut sys = System::new();
-    sys.refresh_cpu_usage();
-
-    loop {
-        thread::sleep(time::Duration::from_millis(200));
+    /* create serial port thread */
+    thread::spawn(move || {
+        let mut sys = System::new();
         sys.refresh_cpu_usage();
 
-        let usage = sys.global_cpu_info().cpu_usage();
-        serial
-            .write(&usage.to_le_bytes())
-            .expect("[ERR] write failed");
+        let mut serial = None;
+
+        loop {
+            thread::sleep(time::Duration::from_millis(200));
+
+            match rx.try_recv() {
+                Ok(port_name) => {
+                    if serial.is_some() {
+                        // close previous port
+                        drop(serial);
+                    }
+
+                    // open new one
+                    serial = Some(
+                        serialport::new(&port_name, 115200)
+                            .timeout(time::Duration::from_millis(10))
+                            .open()
+                            .expect(&format!("[ERR] cannot open port {}", &port_name)),
+                    );
+                }
+                Err(mpsc::TryRecvError::Empty) => {
+                    // do nothing
+                }
+                Err(mpsc::TryRecvError::Disconnected) => {
+                    break;
+                }
+            }
+
+            sys.refresh_cpu_usage();
+            let usage = sys.global_cpu_info().cpu_usage();
+
+            // write usage to serial
+            if let Some(ref mut port) = serial {
+                port.write(&usage.to_le_bytes())
+                    .expect("[ERR] write failed");
+            }
+        }
+    });
+
+    // prevent main thread from exiting
+    loop {
+        thread::park();
     }
 }
