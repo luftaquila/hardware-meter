@@ -8,7 +8,7 @@ use tray_item::{IconSource, TrayItem};
 fn main() {
     /* create tray icon */
     let mut tray = TrayItem::new(
-        "cpu-meter @luftaquila\ngithub.com/luftaquila/cpu-meter",
+        "cpu-meter @luftaquila",
         IconSource::Resource("tray-default"),
     )
     .unwrap();
@@ -68,7 +68,7 @@ fn main() {
                         drop(serial);
                     }
 
-                    // open new one
+                    // open new selected port
                     serial = Some(
                         serialport::new(&port_name, 115200)
                             .timeout(time::Duration::from_millis(10))
@@ -84,11 +84,11 @@ fn main() {
                 }
             }
 
-            sys.refresh_cpu_usage();
-            let usage = sys.global_cpu_info().cpu_usage();
-
             // write usage to serial
             if let Some(ref mut port) = serial {
+                sys.refresh_cpu_usage();
+                let usage = sys.global_cpu_info().cpu_usage();
+
                 port.write(&usage.to_le_bytes())
                     .expect("[ERR] write failed");
             }
