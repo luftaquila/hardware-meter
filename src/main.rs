@@ -25,14 +25,24 @@ fn main() {
 
     let ports = serialport::available_ports().expect("[ERR] No ports found!");
     for p in ports {
-        let name = p.port_name.clone();
-        let tx = tx.clone();
+        if let serialport::SerialPortType::UsbPort(ref usb) = p.port_type {
+            let name = p.port_name.clone();
+            let tx = tx.clone();
 
-        tray.inner_mut()
-            .add_menu_item(&p.port_name, move || {
-                tx.send(name.clone()).unwrap();
-            })
-            .unwrap();
+            if let Some(ref product) = usb.product {
+                tray.inner_mut()
+                    .add_menu_item(&product, move || {
+                        tx.send(name.clone()).unwrap();
+                    })
+                    .unwrap();
+            } else {
+                tray.inner_mut()
+                    .add_menu_item(&p.port_name, move || {
+                        tx.send(name.clone()).unwrap();
+                    })
+                    .unwrap();
+            }
+        }
     }
     tray.inner_mut().add_separator().unwrap();
 
