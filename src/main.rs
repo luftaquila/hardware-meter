@@ -7,18 +7,17 @@ use tray_item::{IconSource, TrayItem};
 
 fn main() {
     /* create tray icon */
-    let mut tray = TrayItem::new(
-        "cpu-meter @luftaquila",
-        IconSource::Resource("tray-default"),
-    )
-    .unwrap();
+    let mut tray = TrayItem::new("cpu-meter @luftaquila", IconSource::Resource("")).unwrap();
 
     tray.add_menu_item("About", || {
         open::that("https://github.com/luftaquila/cpu-meter").expect("[ERR] Cannot open browser");
     })
     .unwrap();
 
+    #[cfg(not(target_os = "macos"))]
     tray.inner_mut().add_separator().unwrap();
+
+    /* refresh port not supported as tray-item-rs does not support delete item */
     // tray.inner_mut().add_menu_item("Refresh", || {}).unwrap();
 
     let (tx, rx) = mpsc::channel();
@@ -29,6 +28,7 @@ fn main() {
             let name = p.port_name.clone();
             let tx = tx.clone();
 
+            #[cfg(target_os = "windows")]
             if let Some(ref product) = usb.product {
                 tray.inner_mut()
                     .add_menu_item(&product, move || {
@@ -42,8 +42,37 @@ fn main() {
                     })
                     .unwrap();
             }
+
+            #[cfg(target_os = "macos")]
+            if name.contains("cu") {
+                // list calling units only
+                if let Some(ref product) = usb.product {
+                    tray.inner_mut()
+                        .add_menu_item(
+                            &[
+                                product.to_string(),
+                                " (".to_string(),
+                                p.port_name,
+                                ")".to_string(),
+                            ]
+                            .join(""),
+                            move || {
+                                tx.send(name.clone()).unwrap();
+                            },
+                        )
+                        .unwrap();
+                } else {
+                    tray.inner_mut()
+                        .add_menu_item(&p.port_name, move || {
+                            tx.send(name.clone()).unwrap();
+                        })
+                        .unwrap();
         }
     }
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
     tray.inner_mut().add_separator().unwrap();
 
     tray.add_menu_item("Quit", || {
@@ -94,6 +123,10 @@ fn main() {
             }
         }
     });
+
+    /* this blocks */
+    #[cfg(target_os = "macos")]
+    tray.inner_mut().display();
 
     // prevent main thread from exiting
     loop {
