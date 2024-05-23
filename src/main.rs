@@ -7,6 +7,10 @@ use tray_item::{IconSource, TrayItem};
 
 fn main() {
     /* create tray icon */
+    #[cfg(target_os = "windows")]
+    let mut tray = TrayItem::new("cpu-meter @luftaquila", IconSource::Resource("tray-default")).unwrap();
+
+    #[cfg(target_os = "macos")]
     let mut tray = TrayItem::new("cpu-meter @luftaquila", IconSource::Resource("")).unwrap();
 
     tray.add_menu_item("About", || {
