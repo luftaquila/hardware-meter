@@ -67,8 +67,8 @@ fn main() {
                             tx.send(name.clone()).unwrap();
                         })
                         .unwrap();
-        }
-    }
+                }
+            }
         }
     }
 
@@ -86,6 +86,7 @@ fn main() {
         sys.refresh_cpu_usage();
 
         let mut serial = None;
+        let mut name = String::new();
 
         loop {
             thread::sleep(time::Duration::from_millis(200));
@@ -98,6 +99,7 @@ fn main() {
                     }
 
                     // open new selected port
+                    name = port_name.clone();
                     serial = Some(
                         serialport::new(&port_name, 115200)
                             .timeout(time::Duration::from_millis(10))
@@ -118,8 +120,27 @@ fn main() {
                 sys.refresh_cpu_usage();
                 let usage = sys.global_cpu_info().cpu_usage();
 
-                port.write(&usage.to_le_bytes())
-                    .expect("[ERR] write failed");
+                match port.write(&usage.to_le_bytes()) {
+                    Ok(_) => {}
+                    Err(_) => {
+                        /* try recover serial */
+                        loop {
+                            thread::sleep(time::Duration::from_millis(500));
+
+                            serial = match serialport::new(name.as_str(), 115200)
+                                .timeout(time::Duration::from_millis(10))
+                                .open()
+                            {
+                                Ok(s) => Some(s),
+                                Err(_) => None,
+                            };
+
+                            if serial.is_some() {
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
     });
