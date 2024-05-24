@@ -2,10 +2,9 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
     tags:
-      - '*'
+      - 'v*'
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -61,3 +60,4 @@ jobs:
           allowUpdates: true
           artifacts: "cpu-meter-windows.exe,cpu-meter-macos,cpu-meter-linux"
           commit: ${{ github.sha }}
+          tag: ${{ github.ref_name }}
