@@ -27,8 +27,6 @@ Choose a voltage range by your MCU's logic level. 5V MCUs such as Arduino can ma
 > <br><br>
 > This will result in the analog gauge not pointing its max position, even if the CPU usage is 100%. For example, if your PC supplies 4.7V and a protection diode drops 0.7V, the gauge will point 4V position even if the CPU is in full load.
 
-<br>
-
 ## DIY!
 1. Connect voltmeter and MCU. Test your voltmeter's polarity with some batteries before connect. + terminal goes to the PWM supported GPIO pin, and - terminal goes to the GND.
 2. Upload a firmware in [`devices/*`](https://github.com/luftaquila/cpu-meter/tree/main/devices) directory to your MCU. Check some parameters (PWM pin, max voltage, etc.) in the code before uploading.
@@ -38,7 +36,7 @@ Choose a voltage range by your MCU's logic level. 5V MCUs such as Arduino can ma
 > For now, only firmware for Arduino is implemented. BTW, it is a basic program that reads 4 bytes from 115200 bps serial (Little-Endian float value) and makes corresponding PWM output. Please contribute!
 
 Optional:
-* Build a housing with 3d print
+* Build a 3d printed housing with models at [`3d models/*`](https://github.com/luftaquila/cpu-meter/tree/main/3d%20models)
 * You can build a desktop executable on your own by running `cargo build --release`.
 
 ## Run
@@ -46,10 +44,19 @@ Optional:
 2. Run your desktop executable. The tray icon will be generated.
 3. Click the tray icon and select your MCU's serial port.
 
+> [!TIP]
+> In macOS, the following command will run the program in the background.
+> <br>
+> `zsh -c "nohup sh -c 'path/to/cpu-meter' &"`
+
+> [!NOTE]
+> The list of the ports is only scanned at the program launch. This is a limit of [tray-item-rs](https://github.com/olback/tray-item-rs), that tray items cannot be edited or removed.
+
+
 ## More
 If you are good at soldering, something like this is possible:
 
-<p align=center><img src='https://github.com/luftaquila/cpu-meter/assets/17094868/64b86bb4-c493-46ee-a92e-635a30d26e69' height=300px> <img src='https://github.com/luftaquila/cpu-meter/assets/17094868/f41067a8-71cc-41a4-b089-065da2732e4b' height=300px> <img src='https://github.com/luftaquila/cpu-meter/assets/17094868/11d534f2-2b8d-4f98-adbc-e1453bd10fb8' height=300px></p>
+<p align=center><img src='https://github.com/luftaquila/cpu-meter/assets/17094868/64b86bb4-c493-46ee-a92e-635a30d26e69' height=200px> <img src='https://github.com/luftaquila/cpu-meter/assets/17094868/f41067a8-71cc-41a4-b089-065da2732e4b' height=200px> <img src='https://github.com/luftaquila/cpu-meter/assets/17094868/11d534f2-2b8d-4f98-adbc-e1453bd10fb8' height=200px></p>
 
 This is a cpu-meter with a USB Type-C port, all components included inside.
 
