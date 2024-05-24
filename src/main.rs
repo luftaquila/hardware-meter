@@ -27,6 +27,13 @@ fn main() {
     #[cfg(target_os = "macos")]
     let mut tray = TrayItem::new("cpu-meter @luftaquila", IconSource::Resource("")).unwrap();
 
+    #[cfg(target_os = "linux")]
+    let mut tray = TrayItem::new(
+        "cpu-meter @luftaquila",
+        IconSource::Resource("tray-default"),
+    )
+    .unwrap();
+
     tray.add_menu_item("About", || {
         open::that("https://github.com/luftaquila/cpu-meter").expect("[ERR] Cannot open browser");
     })
@@ -61,7 +68,7 @@ fn main() {
                     .unwrap();
             }
 
-            #[cfg(target_os = "macos")]
+            #[cfg(any(target_os = "macos", target_os = "linux"))]
             if name.contains("cu") {
                 // list calling units only
                 if let Some(ref product) = usb.product {

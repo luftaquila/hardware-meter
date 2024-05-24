@@ -10,7 +10,12 @@ directories = "5.0"
 open = "5.1"
 sysinfo = "0.30"
 serialport = "4.3"
+
+[target.'cfg(any(target_os = "windows", target_os = "macos"))'.dependencies]
 tray-item = "0.10"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+tray-item = { version = "0.10", features = ["ksni"] }
 
 [build-dependencies]
 embed-resource = "2.3"
