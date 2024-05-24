@@ -1,14 +1,28 @@
 #![windows_subsystem = "windows"]
 
-use std::{sync::mpsc, thread, time};
+use std::{fs, io::Write, sync::mpsc, thread, time};
 
+use directories::ProjectDirs;
 use sysinfo::System;
 use tray_item::{IconSource, TrayItem};
+
+macro_rules! config {
+    () => {{
+        ProjectDirs::from("", "luftaquila", "cpu-meter")
+            .unwrap()
+            .data_local_dir()
+            .to_path_buf()
+    }};
+}
 
 fn main() {
     /* create tray icon */
     #[cfg(target_os = "windows")]
-    let mut tray = TrayItem::new("cpu-meter @luftaquila", IconSource::Resource("tray-default")).unwrap();
+    let mut tray = TrayItem::new(
+        "cpu-meter @luftaquila",
+        IconSource::Resource("tray-default"),
+    )
+    .unwrap();
 
     #[cfg(target_os = "macos")]
     let mut tray = TrayItem::new("cpu-meter @luftaquila", IconSource::Resource("")).unwrap();
@@ -110,6 +124,15 @@ fn main() {
                             .open()
                             .expect(&format!("[ERR] cannot open port {}", &port_name)),
                     );
+
+                    // write latest port to file
+                    let config = config!();
+                    fs::create_dir_all(config.clone()).unwrap();
+
+                    if !config.join("prev.txt").exists() {
+                        let mut file = fs::File::create(&config.join("prev.txt")).unwrap();
+                        file.write_all(port_name.as_bytes()).unwrap();
+                    }
                 }
                 Err(mpsc::TryRecvError::Empty) => {
                     // do nothing
@@ -148,6 +171,14 @@ fn main() {
             }
         }
     });
+
+    /* read previous port from file */
+    let prev = config!().join("prev.txt");
+
+    if prev.exists() {
+        let prev = fs::read_to_string(&prev).unwrap();
+        tx.send(prev).unwrap();
+    }
 
     /* this blocks */
     #[cfg(target_os = "macos")]
