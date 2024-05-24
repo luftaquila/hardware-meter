@@ -6,6 +6,9 @@ use directories::ProjectDirs;
 use sysinfo::System;
 use tray_item::{IconSource, TrayItem};
 
+#[cfg(target_os = "macos")]
+use daemonize::Daemonize;
+
 macro_rules! config {
     () => {{
         ProjectDirs::from("", "luftaquila", "cpu-meter")
@@ -180,12 +183,18 @@ fn main() {
         tx.send(prev).unwrap();
     }
 
-    /* this blocks */
     #[cfg(target_os = "macos")]
-    tray.inner_mut().display();
-
-    // prevent main thread from exiting
-    loop {
-        thread::park();
-    }
+    match Daemonize::new()
+        .stdout(fs::File::create("/tmp/cpu.out").unwrap())
+        .stderr(fs::File::create("/tmp/cpu.err").unwrap())
+        .start()
+    {
+        Ok(_) => {
+            tray.inner_mut().display();
+        }
+        Err(e) => {
+            eprintln!("[WRN] failed to daemonize: {}", e);
+            tray.inner_mut().display();
+        }
+    };
 }
