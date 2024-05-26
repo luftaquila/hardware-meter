@@ -22,7 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "tim.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -261,6 +261,17 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  /* TIM1 clock (APB2 timer clock) = 32 MHz
+   * PWM frequency = 1 kHz
+   * Period = 1100 for easy pulse calculation
+   * pulse = 1000 => PWM output 3V (pulse 1100 => 3.3V)
+   * pulse = (10 * cpu usage).
+   * Prescaler = 28 for 1 kHz PWM. (exact 28.09)
+   * Received Buf is 4 byte little endian float cpu usage percent
+   */
+  int value = (int)(*(float *)Buf * 10.0);
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, value);
+
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
