@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 
-use std::{fs, io::Write, sync::mpsc, thread, time};
+use std::{fs, io::Write, process, sync::mpsc, thread, time};
 
 use directories::ProjectDirs;
 use sysinfo::System;
@@ -125,12 +125,13 @@ fn main() {
 
                     // open new selected port
                     name = port_name.clone();
-                    serial = Some(
-                        serialport::new(&port_name, 115200)
-                            .timeout(time::Duration::from_millis(10))
-                            .open()
-                            .expect(&format!("[ERR] cannot open port {}", &port_name)),
-                    );
+                    serial = match serialport::new(&port_name, 115200)
+                        .timeout(time::Duration::from_millis(10))
+                        .open()
+                    {
+                        Ok(p) => Some(p),
+                        Err(_) => process::exit(1),
+                    };
 
                     // write latest port to file
                     let config = config!();
