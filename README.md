@@ -28,36 +28,47 @@ Choose a voltage range by your MCU's logic level. 5V MCUs such as Arduino can ma
 > This will result in the analog gauge not pointing its max position, even if the CPU usage is 100%. For example, if your PC supplies 4.7V and a protection diode drops 0.7V, the gauge will point 4V position even if the CPU is in full load.
 
 ## DIY!
-1. Connect voltmeter and MCU. Test your voltmeter's polarity with some batteries before connect. + terminal goes to the PWM supported GPIO pin, and - terminal goes to the GND.
-2. Upload a firmware in [`devices/*`](https://github.com/luftaquila/cpu-meter/tree/main/devices) directory to your MCU. Check some parameters (PWM pin, max voltage, etc.) in the code before uploading.
-3. Download a desktop executable at [Releases](https://github.com/luftaquila/cpu-meter/releases).
+1. Connect voltmeter and MCU. Test your voltmeter's polarity with some batteries before connect.
+    * `+` terminal goes to the PWM supported GPIO pin, and `-` terminal goes to the GND.
+3. Upload a firmware in [`devices/*`](https://github.com/luftaquila/cpu-meter/tree/main/devices) directory to your MCU.
+
+|Supported MCU|PWM pin|Voltmeter<br>range|Note|Implementation|
+|:-:|:-:|:-:|:-:|:-:|
+|Arduino|D3|0-5V|Arduino IDE project (*.ino)<br>Use USB supported chips (e.g. ATmega32u4)|[4255dcc](https://github.com/luftaquila/cpu-meter/commit/4255dcc31e8221ad6f17f32b5cbf0cf269fe91b5)|
+|STM32F4|PA8|0-3V|STM32CubeIDE project<br>Use USB-FS CDC|[7c3e3a1](https://github.com/luftaquila/cpu-meter/commit/7c3e3a1a7421477c3b945049cbb990eb700c9f11)|
 
 > [!NOTE]
-> For now, only firmware for Arduino is implemented. BTW, it is a basic program that reads 4 bytes from 115200 bps serial (Little-Endian float value) and makes corresponding PWM output. Please contribute!
+> If there is no firmware for your MCU, please implement and contribute your own!
+> <br>
+> It is just a basic program that reads 4 bytes little-endian float value from the serial and makes corresponding PWM output.
 
 Optional:
-* Build a 3d printed housing with models at [`3d models/*`](https://github.com/luftaquila/cpu-meter/tree/main/3d%20models)
-* You can build a desktop executable on your own by running `cargo build --release`.
+* Build a 3d printed housing with 3d models at [`3d models/*`](https://github.com/luftaquila/cpu-meter/tree/main/3d%20models)
 
 ## Run
-1. Connect your MCU and PC with a USB cable.
-2. Run your desktop executable. The tray icon will be generated.
-3. Click the tray icon and select your MCU's serial port.
+1. Download a latest desktop program at [Releases](https://github.com/luftaquila/cpu-meter/releases).
+2. Connect your MCU and PC with a USB cable.
+3. Run your desktop executable. The tray icon will be generated.
+4. Click the tray icon and select your MCU's serial port.
+
+> [!NOTE]
+> The list of the ports will be only scanned at the program launch.
+> <br>
+> This is a limit of [tray-item-rs](https://github.com/olback/tray-item-rs) as their tray items are not editable or removable.
+
+> [!TIP]
+> You can build a desktop program on your own by running `cargo build --release`.
 
 > [!TIP]
 > In macOS, the following command will run the program in the background.
 > <br>
 > `zsh -c "nohup sh -c 'path/to/cpu-meter' &"`
 
-> [!NOTE]
-> The list of the ports is only scanned at the program launch. This is a limit of [tray-item-rs](https://github.com/olback/tray-item-rs), that tray items cannot be edited or removed.
-
-
 ## More
 If you are good at soldering, something like this is possible:
 
 <p align=center><img src='https://github.com/luftaquila/cpu-meter/assets/17094868/64b86bb4-c493-46ee-a92e-635a30d26e69' height=200px> <img src='https://github.com/luftaquila/cpu-meter/assets/17094868/f41067a8-71cc-41a4-b089-065da2732e4b' height=200px> <img src='https://github.com/luftaquila/cpu-meter/assets/17094868/11d534f2-2b8d-4f98-adbc-e1453bd10fb8' height=200px></p>
 
-This is a cpu-meter with a USB Type-C port, all components included inside.
+This is a cpu-meter with a USB Type-C port. All components including MCU and the Type-C port is mounted inside voltmeter.
 
-The analog gauge is 0-5V 85C1 voltmeter and the red board is an Arduino Pico. USB Micro port on Pico is desoldered and jumped onto a DIY Type-C board at the back side.
+The [Arduino Pico](https://projecthub.arduino.cc/MellBell/arduino-pico-the-worlds-smallest-arduino-board-bc7986) runs 0-5V 85C1 voltmeter. USB Micro port on the Pico is desoldered and jumped onto a DIY Type-C board at the back side.
