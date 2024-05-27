@@ -36,6 +36,7 @@ Choose a voltage range by your MCU's logic level. 5V MCUs such as Arduino can ma
 |:-:|:-:|:-:|:-:|:-:|
 |Arduino|D3|0-5V|Arduino IDE project (*.ino)<br>Use USB supported chips (e.g. ATmega32u4)|[4255dcc](https://github.com/luftaquila/cpu-meter/commit/4255dcc31e8221ad6f17f32b5cbf0cf269fe91b5)|
 |STM32F4|PA8|0-3V|STM32CubeIDE project<br>Use USB-FS CDC|[7c3e3a1](https://github.com/luftaquila/cpu-meter/commit/7c3e3a1a7421477c3b945049cbb990eb700c9f11)|
+|STM32F1|PA8|0-3V|STM32CubeIDE project<br>Use USB-FS CDC|[265403c](https://github.com/luftaquila/cpu-meter/commit/265403c16b42c878c83aad94794e0df8ea754b39)|
 
 > [!NOTE]
 > If there is no firmware for your MCU, please implement and contribute your own!
