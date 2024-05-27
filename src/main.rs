@@ -130,23 +130,28 @@ fn main() {
                         .open()
                     {
                         Ok(p) => Some(p),
-                        Err(_) => process::exit(1),
+                        Err(e) => {
+                            eprintln!("[ERR] port {} open failed: {}", port_name, e);
+                            None
+                        }
                     };
 
-                    // write latest port to file
+                    if serial.is_none() {
+                        continue;
+                    }
+
+                    /* save latest port to a file */
                     let config = config!();
                     fs::create_dir_all(config.clone()).unwrap();
 
-                    if !config.join("prev.txt").exists() {
-                        let mut file = fs::File::create(&config.join("prev.txt")).unwrap();
-                        file.write_all(port_name.as_bytes()).unwrap();
-                    }
+                    let mut file = fs::File::create(&config.join("prev.txt")).unwrap();
+                    file.write_all(port_name.as_bytes()).unwrap();
+
                 }
-                Err(mpsc::TryRecvError::Empty) => {
-                    // do nothing
-                }
+                Err(mpsc::TryRecvError::Empty) => {} // do nothing
                 Err(mpsc::TryRecvError::Disconnected) => {
-                    break;
+                    eprintln!("[ERR] thread comm disconnected!");
+                    process::exit(1);
                 }
             }
 
