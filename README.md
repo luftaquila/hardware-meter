@@ -1,7 +1,7 @@
 # cpu-meter
 `cpu-meter` is a classical analog gauge that shows a cpu usage. It is a simple analog voltmeter with a microprocessor. Any MCU with USB serial communication and PWM GPIO could be used.
 
-<p align=center><img src='https://github.com/luftaquila/cpu-meter/assets/17094868/03c583aa-1326-47a0-9ed3-b35024430d33' width=70%></p>
+https://github.com/luftaquila/cpu-meter/assets/17094868/05a8670c-ace7-459e-b40a-1173809b3f6e
 
 `cpu-meter` supports Windows, MacOS, and Linux (not tested yet).\
 Any MCUs like Arduino(ATmega), STM32 and ESP32 with USB and PWM could be used.
