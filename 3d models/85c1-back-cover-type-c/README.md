@@ -1,0 +1,1 @@
+![](85c1-back-cover-type-c.png)
