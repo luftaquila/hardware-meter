@@ -267,8 +267,10 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
    * Prescaler = 44 for 1 kHz PWM. (exact 43.64)
    * Received Buf is 4 byte little endian float cpu usage percent
    */
-  int value = (int)(*(float *)Buf * 10.0);
-  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, value);
+  int value = (int)(*(float *)(Buf) * 10.0);
+  int channel = ((int)*(Buf) - 100) * 0x04;
+
+  __HAL_TIM_SET_COMPARE(&htim1, channel, value);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
