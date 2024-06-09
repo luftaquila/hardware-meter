@@ -10,6 +10,8 @@ directories = "5.0"
 open = "5.1"
 sysinfo = "0.30"
 serialport = "4.3"
+strum = "0.26"
+strum_macros = "0.26"
 
 [target.'cfg(any(target_os = "windows", target_os = "macos"))'.dependencies]
 tray-item = "0.10"
