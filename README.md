@@ -3,8 +3,15 @@
 
 https://github.com/luftaquila/cpu-meter/assets/17094868/05a8670c-ace7-459e-b40a-1173809b3f6e
 
-`cpu-meter` supports Windows, MacOS, and Linux (not tested yet).\
+Supports Windows, MacOS, and Linux (not tested yet).\
 Any MCUs like Arduino(ATmega), STM32 and ESP32 with USB and PWM could be used.
+
+### Todo
+* turn on/off mesurements & save to file
+* setup mcu pwm channels and sync to flash
+* native-dialog-rs messagebox
+* better tray application with tauri
+* new mesurement data types
 
 ## Prerequisites
 * Any MCU with USB serial and PWM output

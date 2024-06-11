@@ -59,6 +59,24 @@ pub enum PacketType {
     MemoryUsage,
     NetRx,
     NetTx,
+    /* TODO: future support, maybe
+     * CpuFreq,
+     * DiskUsage,
+     * DiskRead,
+     * DiskWrite,
+     *
+     * GpuUsage,
+     * CpuTemp,
+     * GpuTemp,
+     * DiskTemp,
+     */
+}
+
+pub struct Enabled {
+    cpu_usage: bool,
+    mem_usage: bool,
+    net_rx: bool,
+    net_tx: bool,
 }
 
 #[derive(EnumIter)]
