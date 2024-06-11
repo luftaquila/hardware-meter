@@ -1,6 +1,13 @@
 #![windows_subsystem = "windows"]
 
-use std::{fs, io::Write, process, sync::mpsc, thread, time};
+use std::{
+    fs,
+    io::{Error, Write},
+    path::PathBuf,
+    process,
+    sync::mpsc,
+    thread, time,
+};
 
 use directories::ProjectDirs;
 use sysinfo::{MemoryRefreshKind, Networks, System};
@@ -9,10 +16,56 @@ use tray_item::{IconSource, TrayItem};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-const UPDATE_MS: u64 = 200;
+use serde::{Deserialize, Serialize};
 
-enum DataType {
-    CPU = 100,
+const UPDATE_MS: u64 = 100;
+const MAGIC_NUM: isize = 100;
+
+#[derive(Serialize, Deserialize)]
+struct ConfigFile {
+    port: String,
+    netif: String,
+    netspd: String,
+}
+
+impl ConfigFile {
+    fn to_json(&self) -> Result<(), Error> {
+        let mut file = fs::File::create(ConfigFile::path())?;
+
+        let serialized = serde_json::to_string(self)?;
+        file.write_all(serialized.as_bytes())?;
+
+        Ok(())
+    }
+
+    fn from_json() -> Result<ConfigFile, Error> {
+        let json = fs::read_to_string(ConfigFile::path())?;
+
+        Ok(serde_json::from_str(&json)?)
+    }
+
+    fn path() -> PathBuf {
+        ProjectDirs::from("", "luftaquila", "cpu-meter")
+            .unwrap()
+            .data_local_dir()
+            .to_path_buf()
+            .join("save.json")
+    }
+}
+
+enum ConfigType {
+    PORT,
+    NETIF,
+    NETSPD,
+}
+
+struct Config {
+    kind: ConfigType,
+    data: String,
+}
+
+enum PacketType {
+    CPU = MAGIC_NUM,
     MEMORY,
     RX,
     TX,
@@ -23,26 +76,6 @@ enum NetworkSpeed {
     Mbps100 = 100,
     Mbps500 = 500,
     Mbps1000 = 1000,
-}
-
-enum ConfigType {
-    PORT,
-    NETWORK,
-    SPEED,
-}
-
-struct Config {
-    kind: ConfigType,
-    data: String,
-}
-
-macro_rules! config {
-    () => {{
-        ProjectDirs::from("", "luftaquila", "cpu-meter")
-            .unwrap()
-            .data_local_dir()
-            .to_path_buf()
-    }};
 }
 
 fn min_f32(x: f32, y: f32) -> f32 {
@@ -165,7 +198,7 @@ fn main() {
         tray.inner_mut()
             .add_menu_item(&network.clone(), move || {
                 tx.send(Config {
-                    kind: ConfigType::NETWORK,
+                    kind: ConfigType::NETIF,
                     data: network.to_string().clone(),
                 })
                 .unwrap();
@@ -184,7 +217,7 @@ fn main() {
         tray.inner_mut()
             .add_menu_item(&(spd.clone() + " Mbps"), move || {
                 tx.send(Config {
-                    kind: ConfigType::SPEED,
+                    kind: ConfigType::NETSPD,
                     data: spd.clone(),
                 })
                 .unwrap();
@@ -242,21 +275,32 @@ fn main() {
                             if serial.is_none() {
                                 continue;
                             }
-
-                            /* save latest port to a file */
-                            let configfile = config!();
-                            fs::create_dir_all(configfile.clone()).unwrap();
-
-                            let mut file = fs::File::create(&configfile.join("prev.txt")).unwrap();
-                            file.write_all(config.data.as_bytes()).unwrap();
                         }
-                        ConfigType::NETWORK => {
-                            interface = Some(config.data);
+                        ConfigType::NETIF => {
+                            interface = Some(config.data.clone());
                         }
-                        ConfigType::SPEED => {
+                        ConfigType::NETSPD => {
                             speed = config.data.parse().unwrap();
                         }
                     }
+
+                    /* save config to file */
+                    let mut save = match ConfigFile::from_json() {
+                        Ok(file) => file,
+                        Err(_) => ConfigFile {
+                            port: String::new(),
+                            netif: String::new(),
+                            netspd: String::new(),
+                        },
+                    };
+
+                    match config.kind {
+                        ConfigType::PORT => save.port = config.data,
+                        ConfigType::NETIF => save.netif = config.data,
+                        ConfigType::NETSPD => save.netspd = config.data,
+                    }
+
+                    let _ = save.to_json();
                 }
                 Err(mpsc::TryRecvError::Empty) => {} // do nothing
                 Err(mpsc::TryRecvError::Disconnected) => {
@@ -269,12 +313,12 @@ fn main() {
             if let Some(ref mut port) = serial {
                 sys.refresh_cpu_usage();
                 let mut cpu = sys.global_cpu_info().cpu_usage().to_le_bytes();
-                cpu[0] = DataType::CPU as u8;
+                cpu[0] = PacketType::CPU as u8;
 
                 sys.refresh_memory_specifics(ram);
                 let mut mem =
                     (sys.used_memory() as f32 / sys.total_memory() as f32 * 100.0).to_le_bytes();
-                mem[0] = DataType::MEMORY as u8;
+                mem[0] = PacketType::MEMORY as u8;
 
                 networks.refresh();
 
@@ -285,7 +329,7 @@ fn main() {
                         let rx_bps = network.received() as f32 / UPDATE_MS as f32 / 1000.0 * 8.0;
                         let mut net_rx =
                             min_f32(rx_bps / speed as f32 * 100.0, 100.0).to_le_bytes();
-                        net_rx[0] = DataType::RX as u8;
+                        net_rx[0] = PacketType::RX as u8;
 
                         if let Err(_) = port.write(&net_rx) {
                             result = false;
@@ -294,7 +338,7 @@ fn main() {
                         let tx_bps = network.transmitted() as f32 / UPDATE_MS as f32 / 1000.0 * 8.0;
                         let mut net_tx =
                             min_f32(tx_bps / speed as f32 * 100.0, 100.0).to_le_bytes();
-                        net_tx[0] = DataType::TX as u8;
+                        net_tx[0] = PacketType::TX as u8;
 
                         if let Err(_) = port.write(&net_tx) {
                             result = false;
@@ -332,16 +376,31 @@ fn main() {
         }
     });
 
-    /* read previous port from file */
-    let prev = config!().join("prev.txt");
+    /* read previous config from file */
+    if let Ok(json) = ConfigFile::from_json() {
+        if !json.port.is_empty() {
+            tx.send(Config {
+                kind: ConfigType::PORT,
+                data: json.port,
+            })
+            .unwrap();
+        }
 
-    if prev.exists() {
-        let prev = fs::read_to_string(&prev).unwrap();
-        tx.send(Config {
-            kind: ConfigType::PORT,
-            data: prev,
-        })
-        .unwrap();
+        if !json.netif.is_empty() {
+            tx.send(Config {
+                kind: ConfigType::NETIF,
+                data: json.netif,
+            })
+            .unwrap();
+        }
+
+        if !json.netspd.is_empty() {
+            tx.send(Config {
+                kind: ConfigType::NETSPD,
+                data: json.netspd,
+            })
+            .unwrap();
+        }
     }
 
     /* this blocks */
