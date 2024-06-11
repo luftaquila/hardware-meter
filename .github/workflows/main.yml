@@ -55,9 +55,12 @@ jobs:
           mv build.cpu-meter-windows/cpu-meter.exe cpu-meter-windows.exe
           mv build.cpu-meter-macos/cpu-meter cpu-meter-macos
           mv build.cpu-meter-linux/cpu-meter cpu-meter-linux
+      - id: changes
+        uses: simbo/changes-between-tags-action@v1
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           artifacts: "cpu-meter-windows.exe,cpu-meter-macos,cpu-meter-linux"
           commit: ${{ github.sha }}
           tag: ${{ github.ref_name }}
+          body: ${{ steps.changes.outputs.changes }}
