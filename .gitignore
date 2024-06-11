@@ -1,6 +1,8 @@
 # STM32CubeIDE
 .metadata/
 .settings/
+Release/
+Debug/
 *.ld
 
 # Created by https://www.toptal.com/developers/gitignore/api/rust,rust-analyzer,vim
