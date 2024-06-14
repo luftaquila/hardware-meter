@@ -16,6 +16,9 @@ void loop() {
     for (int i = 0; i < 4; i++) {
       f.bytes[i] = Serial.read();
     }
-    analogWrite(PWM, int(2.55 * f.value));
+
+    if (f.bytes[0] == 100) {
+      analogWrite(PWM, int(2.55 * f.value));
+    }
   }
 }
