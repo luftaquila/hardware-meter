@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
 
 pub const UPDATE_MS: u64 = 100;
-pub const MAGIC_NUM: isize = 100;
 
 #[derive(Serialize, Deserialize)]
 pub struct ConfigFile {
@@ -55,7 +54,7 @@ pub struct Config {
 }
 
 pub enum PacketType {
-    CpuUsage = MAGIC_NUM,
+    CpuUsage = 0,
     MemoryUsage,
     NetRx,
     NetTx,
