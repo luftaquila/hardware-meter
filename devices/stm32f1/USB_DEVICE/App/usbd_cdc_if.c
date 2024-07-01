@@ -22,7 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "tim.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,7 +31,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-extern TIM_HandleTypeDef htim1;
+
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -259,19 +259,49 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  /* TIM1 clock (APB2 timer clock) = 48 MHz
+  /* TIM clock (APB1 and APB2 timer clock) = 48 MHz
    * PWM frequency = 1 kHz
    * Period = 1100 for easy pulse calculation
    * pulse = 1000 => PWM output 3V (pulse 1100 => 3.3V)
-   * pulse = (10 * cpu usage).
+   * pulse = (10 * packet value).
    * Prescaler = 44 for 1 kHz PWM. (exact 43.64)
-   * Received Buf is 4 byte little endian float cpu usage percent
+   *
+   * packet value is a 4 byte little endian float percentage
+   * first byte in the packet designates the pwm output port
+   *
+   * |       < PACKET STRUCTURE >       |
+   * |  byte 0  byte 1  byte 2  byte 3  |
+   * | | port |                         |
+   * | |   value (float percentage)   | |
+   *
+   * port uses the part of the fraction bits of the IEEE 754 float structure
+   * this sacrifies the precision of the value, but it won't visible in the meter
    */
-  int value = (int)(*(float *)(Buf) * 10.0);
-  int channel = ((int)*(Buf) - 100) * 0x04;
+  for (uint8_t *p = Buf; p < Buf + *Len; p += sizeof(uint32_t)) {
+    int value = (int)(*(float *)(p) * 10.0);
 
-  __HAL_TIM_SET_COMPARE(&htim1, channel, value);
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+    uint8_t port = *p;
+    TIM_HandleTypeDef *timer;
+
+    const int ch_per_tim = 3;
+
+    // supports max 6 ports (TIM1 and TIM2, each 3 channels)
+    if (port > 2 * ch_per_tim - 1) {
+      continue;
+    }
+
+    if (port < ch_per_tim) {
+      timer = &htim1;
+    } else {
+      timer = &htim2;
+      port -= ch_per_tim;
+    }
+
+    // channel number TIM_CHANNEL_N is port * 4
+    __HAL_TIM_SET_COMPARE(timer, port * 4, value);
+  }
+
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, Buf);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
   /* USER CODE END 6 */
