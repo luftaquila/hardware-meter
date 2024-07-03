@@ -8,7 +8,7 @@ use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub enum GaugeType {
+pub enum Gauge {
     CpuUsage { core: i32, value: f32 },
     CpuFreq { core: i32, value: f32 },
     CpuTemp(f32),
@@ -31,15 +31,10 @@ pub enum GaugeType {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Gauge {
-    id: u32,
-    kind: GaugeType,
-}
-
-#[derive(Serialize, Deserialize)]
 pub struct ConfigFile {
     pub port: String,
     pub active: Vec<Gauge>,
+    pub update: u64,
 }
 
 impl ConfigFile {

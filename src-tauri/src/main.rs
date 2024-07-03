@@ -1,7 +1,5 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -11,17 +9,26 @@ mod common;
 mod serial;
 
 use std::{sync::mpsc, thread};
-use crate::serial::serial_thread;
 
 use tauri::Manager;
 use tauri::{CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
 
+use crate::{common::ConfigFile, serial::serial_thread};
+
 fn main() {
+    let mut config_exists = false;
     let (tx, rx) = mpsc::channel();
-    
+
     /* create serial port thread */
     thread::spawn(move || serial_thread(rx));
 
+    /* use previous config file if exists */
+    if let Ok(file) = ConfigFile::from_json() {
+        config_exists = true;
+        tx.send(file).unwrap();
+    }
+
+    /* set system tray menu */
     let tray_menu = SystemTrayMenu::new()
         .add_item(CustomMenuItem::new("about".to_string(), "About"))
         .add_native_item(SystemTrayMenuItem::Separator)
@@ -62,7 +69,13 @@ fn main() {
         })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
-        .run(|_app_handle, event| match event {
+        .run(move |app, event| match event {
+            tauri::RunEvent::Ready => {
+                // show settings on launch only if there is no valid config file
+                if !config_exists {
+                    app.get_window("main").unwrap().show().unwrap();
+                }
+            }
             tauri::RunEvent::ExitRequested { api, .. } => {
                 api.prevent_exit();
             }
