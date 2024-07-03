@@ -7,6 +7,7 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+mod common;
 mod serial;
 
 use std::{sync::mpsc, thread};
