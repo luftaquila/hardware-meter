@@ -1,10 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
+mod command;
 mod common;
 mod serial;
 
@@ -13,7 +9,11 @@ use std::{sync::mpsc, thread};
 use tauri::Manager;
 use tauri::{CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
 
-use crate::{common::ConfigFile, serial::serial_thread};
+use crate::{
+    command::{refresh_port},
+    common::ConfigFile,
+    serial::serial_thread,
+};
 
 fn main() {
     let mut config_exists = false;
@@ -67,6 +67,7 @@ fn main() {
             }
             _ => {}
         })
+        .invoke_handler(tauri::generate_handler![refresh_port])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(move |app, event| match event {
