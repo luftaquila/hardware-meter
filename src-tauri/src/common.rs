@@ -7,27 +7,39 @@ use std::{
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Copy, Serialize, Deserialize)]
+pub enum NetworkSpeed {
+    Mbps1 = 1,
+    Mbps5 = 5,
+    Mbps10 = 10,
+    Mbps50 = 50,
+    Mbps100 = 100,
+    Mbps500 = 500,
+    Gbps1 = 1000,
+    Gbps5 = 5000,
+}
+
 #[derive(Serialize, Deserialize)]
 pub enum Gauge {
-    CpuUsage { core: i32, value: f32 },
-    CpuFreq { core: i32, value: f32 },
-    CpuTemp(f32),
+    CpuUsage { core: i32 },
+    CpuFreq { core: i32 },
+    CpuTemp,
 
-    MemoryUsage(f32),
-    SwapUsage(f32),
+    MemoryUsage,
+    SwapUsage,
 
-    NetTx { netif: String, value: u64 },
-    NetRx { netif: String, value: u64 },
-    NetTxRx { netif: String, value: u64 },
+    NetTx { netif: String, unit: NetworkSpeed },
+    NetRx { netif: String, unit: NetworkSpeed },
+    NetTxRx { netif: String, unit: NetworkSpeed },
 
-    DiskUsage { name: String, value: f32 },
-    DiskTx { name: String, value: u64 },
-    DiskRx { name: String, value: u64 },
-    DiskTxRx { name: String, value: u64 },
+    DiskUsage { name: String },
+    DiskTx { name: String },
+    DiskRx { name: String },
+    DiskTxRx { name: String },
 
-    GpuUsage { id: i32, value: f32 },
-    GpuFreq { id: i32, value: f32 },
-    GpuTemp(f32),
+    GpuUsage { id: i32 },
+    GpuFreq { id: i32 },
+    GpuTemp { id: i32 },
 }
 
 #[derive(Serialize, Deserialize)]
@@ -59,5 +71,13 @@ impl ConfigFile {
             .data_local_dir()
             .to_path_buf()
             .join("config.json")
+    }
+}
+
+pub fn min_f32(x: f32, y: f32) -> f32 {
+    if x < y {
+        x
+    } else {
+        y
     }
 }
