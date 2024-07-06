@@ -183,7 +183,7 @@ table#channel-list td {
 
 #channel-list td:nth-child(6):hover,
 #channel-list td:nth-child(6).active {
-  filter: drop-shadow(0 0 0.7em #4b008250);
+  filter: drop-shadow(0 0 0.7em #4b008290);
 }
 
 #channel-list td:nth-child(6).selected {

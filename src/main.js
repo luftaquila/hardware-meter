@@ -19,7 +19,7 @@ async function init_ui () {
   }
 
   gauge_types_list = await invoke("get_gauge_types", {});
-  let gauge_types = "<option disabled selected>Select gauge type</option>";
+  let gauge_types = "<option disabled selected value=''>Select gauge type</option>";
   
   for (const [i, item] of gauge_types_list.entries()) {
     gauge_types += `<option value='${i}'>${item}</option>`;
@@ -41,14 +41,28 @@ async function init_event_handler() {
     await invoke("open_config_dir", {});
   });
 
+  /* .config change event */
   document.querySelector(".container").addEventListener("change", async e => {
-    if (e.target && e.target.matches('.config')) {
-      // await invoke("config", {});
+    if (!(e.target && e.target.matches('.config'))) {
+      return;
     }
 
-    if (e.target && e.target.matches('.channel-type')) {
-      e.target.closest('table').querySelector('input.channel-active').disabled = false;
+    if (e.target.matches('.channel-active')) {
+      if (e.target.checked) {
+        const target = e.target.closest('div.channel-conf').id.replace("channel-conf-", '');
+        document.querySelector(`#${target}`).classList.add('active');
+      }
+    }
+
+    // set channel detailed configuration ui
+    if (e.target.matches('.channel-type')) {
       e.target.closest('table').querySelector('td.channel-detail').innerHTML = await build_channel_detail(e.target.value);
+    }
+
+    // config validation
+    if (validate_channel_config(e.target.closest('div.channel-conf').id)) {
+      console.log('valid');
+      // await invoke("config", {});
     }
   });
 
@@ -59,6 +73,44 @@ async function init_event_handler() {
     document.querySelectorAll("div.channel-conf:not(.hidden)").forEach(d => d.classList.add('hidden'));
     document.querySelector(`#channel-conf-${e.srcElement.id}`).classList.remove("hidden");
   }));
+}
+
+function validate_channel_config(id) {
+  const target = document.querySelector(`#${id}`);
+
+  /* enable active checkbox if others are valid */
+  switch (gauge_types_list[target.querySelector(`select.channel-type`).value]) {
+    case "CPU Utilization":
+    case "CPU Frequency":
+      if (target.querySelector(`select.channel-coreid`).value) {
+        target.querySelector(`input.channel-active`).disabled = false;
+      } else {
+        target.querySelector(`input.channel-active`).disabled = true;
+        return false;
+      }
+      break;
+
+    case "Network Transmit Speed":
+    case "Network Receive Speed":
+    case "Network Receive & Transmit Speed":
+      if (target.querySelector(`select.channel-netif`).value && target.querySelector(`select.channel-speed`).value) {
+        target.querySelector(`input.channel-active`).disabled = false;
+      } else {
+        target.querySelector(`input.channel-active`).disabled = true;
+        return false;
+      }
+      break;
+
+    default:
+      target.querySelector(`input.channel-active`).disabled = false;
+      break;
+  }
+
+  if (!target.querySelector(`input.channel-active`).checked) {
+    return false;
+  }
+
+  return true;
 }
 
 function build_channel_btn(ch) {
@@ -109,8 +161,8 @@ function build_channel_detail(value) {
 async function build_core_selection() {
   const core_cnt = await invoke("get_core_count", {});
 
-  let html = `<select class='channel-coreid'>
-                <option disabled selected>Select Core</option>
+  let html = `<select class='channel-coreid config'>
+                <option disabled selected value=''>Select Core</option>
                 <option value='-1'>All Core</option>`;
 
   for (let i = 0; i < core_cnt; i++) {
@@ -126,15 +178,15 @@ async function build_network_selection() {
   const netif_list = await invoke("get_netifs", {});
   const speed_unit_list = await invoke("get_speed_units", {});
 
-  let html = `<select class='channel-netif'>
-                <option disabled selected>Select Network</option>`;
+  let html = `<select class='channel-netif config'>
+                <option disabled selected value=''>Select Network</option>`;
 
   for (let i = 0; i < netif_list.length; i++) {
     html += `<option value='${netif_list[i]}'>${netif_list[i]}</option>`;
   }
 
-  html += `</select><select class='channel-speed'>`;
-  html += `<option disabled selected>Select Speed Unit</option>`;
+  html += `</select><select class='channel-speed config'>`;
+  html += `<option disabled selected value=''>Select Speed Unit</option>`;
 
   for (let i = 0; i < speed_unit_list.length; i++) {
     html += `<option value='${speed_unit_list[i]}'>${speed_unit_list[i]}</option>`;
