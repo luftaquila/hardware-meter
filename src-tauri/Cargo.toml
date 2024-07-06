@@ -20,6 +20,9 @@ open = "5.1"
 serialport = "4.3"
 sysinfo = "0.30"
 
+strum = "0.26"
+strum_macros = "0.26"
+
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]

@@ -10,7 +10,10 @@ use tauri::Manager;
 use tauri::{CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
 
 use crate::{
-    command::{refresh_port},
+    command::{
+        get_channel_count, get_core_count, get_gauge_types, get_netifs, get_ports, get_speed_units,
+        open_config_dir,
+    },
     common::ConfigFile,
     serial::serial_thread,
 };
@@ -67,7 +70,15 @@ fn main() {
             }
             _ => {}
         })
-        .invoke_handler(tauri::generate_handler![refresh_port])
+        .invoke_handler(tauri::generate_handler![
+            get_core_count,
+            get_channel_count,
+            get_gauge_types,
+            get_netifs,
+            get_speed_units,
+            get_ports,
+            open_config_dir
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(move |app, event| match event {

@@ -10,8 +10,8 @@
   line-height: 24px;
   font-weight: 400;
 
-  color: #0f0f0f;
-  background-color: #f6f6f6;
+  color: #ddd;
+  background-color: #2f2f2f;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -35,11 +35,6 @@
   cursor: default;
 }
 
-h1 {
-  margin-left: 0.5em;
-  text-align: left;
-}
-
 .container {
   margin: 0;
   display: flex;
@@ -49,6 +44,22 @@ h1 {
   text-align: center;
 }
 
+.submenu {
+  margin-bottom: 1.5em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+h1 {
+  text-align: center;
+}
+
+a {
+  color: rgb(3, 102, 214);
+  cursor: pointer;
+}
 
 input,
 button {
@@ -58,8 +69,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  color: #0f0f0f;
-  background-color: #ffffff;
+  color: #ffffff;
+  background-color: #0f0f0f70;
   transition: border-color 0.25s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
   outline: none;
@@ -76,19 +87,27 @@ button {
 button:hover {
   will-change: filter;
   transition: 0.5s;
-  filter: drop-shadow(0 0 1em #ffffff);
+  filter: drop-shadow(0 0 1em #0f0f0f98);
 }
 
 button:active {
   transition: 0.1s;
-  background-color: #e8e8e8;
+  background-color: #0f0f0f50;
 }
 
+select {
+  border: 1px solid #666;
+  background: #555;
+  color: #f6f6f6;
+  font-family: inherit;
+  border-radius: 8px;
+  padding: 0.5em 1em;
+  cursor: pointer;
+}
 
 select#device {
+  width: 20em;
   font-size: 1em;
-  font-family: inherit;
-  padding: 0.5em 1em;
   border-radius: 8px;
   margin-right: 1em;
 }
@@ -97,54 +116,124 @@ select#device {
   margin-right: 5px;
 }
 
-/* channel settings */
+/* channel selectors */
 table#channel-list {
   max-width: 50em;
   min-width: 700px;
-  margin: 0em 1em;
   text-align: center;
   border-spacing: 2em 0em;
   table-layout: fixed;
+  margin: 0 auto;
 }
 
 table#channel-list td {
   width: 16%;
-  padding: 0.8em;
+  padding: 0.6em 0.8em;
   cursor: pointer;
-  background-color: #222;
+  background-color: #202020;
   border-radius: 10px;
   will-change: filter;
   transition: 0.75s;
 }
 
-table#channel-list td:hover {
-  filter: drop-shadow(0 0 1em #ffe21c);
+#channel-list td:nth-child(1):hover,
+#channel-list td:nth-child(1).active {
+  filter: drop-shadow(0 0 0.7em #ff000050);
 }
 
-/* dark theme support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #ddd;
-    background-color: #2f2f2f;
-  }
-
-  input,
-  button {
-    color: #ffffff;
-    background-color: #0f0f0f98;
-  }
-
-  button:hover {
-    filter: drop-shadow(0 0 1em #0f0f0f98);
-  }
-
-  button:active {
-    background-color: #0f0f0f50;
-  }
-
-  select {
-    border: 1px solid #666;
-    background: #555;
-    color: #f6f6f6;
-  }
+#channel-list td:nth-child(1).selected {
+  filter: drop-shadow(0 0 0.7em #ff0000);
 }
+
+#channel-list td:nth-child(2):hover,
+#channel-list td:nth-child(2).active {
+  filter: drop-shadow(0 0 0.7em #ff7f0050);
+}
+
+#channel-list td:nth-child(2).selected {
+  filter: drop-shadow(0 0 0.7em #ff7f00);
+}
+
+#channel-list td:nth-child(3):hover,
+#channel-list td:nth-child(3).active {
+  filter: drop-shadow(0 0 0.7em #ffff0050);
+}
+
+#channel-list td:nth-child(3).selected {
+  filter: drop-shadow(0 0 0.7em #ffff00);
+}
+
+#channel-list td:nth-child(4):hover,
+#channel-list td:nth-child(4).active {
+  filter: drop-shadow(0 0 0.7em #00ff0050);
+}
+
+#channel-list td:nth-child(4).selected {
+  filter: drop-shadow(0 0 0.7em #00ff00);
+}
+
+#channel-list td:nth-child(5):hover,
+#channel-list td:nth-child(5).active {
+  filter: drop-shadow(0 0 0.7em #0000ff50);
+}
+
+#channel-list td:nth-child(5).selected {
+  filter: drop-shadow(0 0 0.7em #0000ff);
+}
+
+#channel-list td:nth-child(6):hover,
+#channel-list td:nth-child(6).active {
+  filter: drop-shadow(0 0 0.7em #4b008250);
+}
+
+#channel-list td:nth-child(6).selected {
+  filter: drop-shadow(0 0 0.7em #4b0082);
+}
+
+table#channel-list td:active {
+  transition: 0.1s;
+  background-color: #282828;
+}
+
+/* channel configurations */
+div.channel-conf {
+  margin-top: 1em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+div.channel-conf table {
+  width: -webkit-fill-available;
+  table-layout: fixed;
+  border-spacing: 2em 1em;
+  text-align: left;
+}
+
+div.channel-conf table tr {
+  height: 2.5em;
+}
+
+div.channel-conf table th {
+  text-align: right;
+}
+
+div.channel-conf table select {
+  display: block;
+}
+
+div.channel-conf table select.channel-speed {
+  margin-top: 0.5em;
+}
+
+div#channel-conf-none {
+  color: #555;
+}
+
+input.channel-active {
+  cursor: pointer;
+  zoom: 1.5;
+}
+
