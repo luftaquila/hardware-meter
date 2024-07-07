@@ -8,6 +8,7 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
     let mut serial = None;
 
     let mut current = ConfigFile {
+        power: false,
         port: String::new(),
         active: vec![],
         update: 200, // default delay value

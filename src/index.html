@@ -17,11 +17,29 @@
 
     <div class="submenu">
       <h2>Device</h2>
+
+      <table style="margin: 0 auto 1em;">
+        <tr>
+          <td>
+            <select id="interval" class="config">
+              <option disabled value=''>Update interval</option>
+              <option value='100'>100 ms</option>
+              <option selected value='200'>200 ms</option>
+              <option value='500'>500 ms</option>
+              <option value='1000'>1000 ms</option>
+            </select>
+          </td>
+          <td>
+            <button id="power">ACTIVATE</button>
+          </td>
+        </tr>
+      </table>
+
       <table>
         <tr>
           <td>
             <select id="device" class="config">
-              <option disabled selected>Select serial port</option>
+              <option disabled selected value=''>Select serial port</option>
             </select>
           </td>
           <td>

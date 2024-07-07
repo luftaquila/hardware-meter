@@ -71,6 +71,7 @@ pub enum Gauge {
 
 #[derive(Serialize, Deserialize)]
 pub struct ConfigFile {
+    pub power: bool,
     pub port: String,
     pub active: Vec<Gauge>,
     pub update: u64,
