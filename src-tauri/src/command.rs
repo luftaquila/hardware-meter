@@ -4,8 +4,43 @@ use sysinfo::{Networks, System};
 use crate::common::{ConfigFile, Gauge, NetworkSpeed, MAX_CHANNEL};
 
 #[tauri::command]
+pub fn config(conf: ConfigFile) {
+    println!("{:?}", conf);
+}
+
+#[tauri::command]
 pub fn get_channel_count() -> i32 {
     MAX_CHANNEL
+}
+
+#[tauri::command]
+pub fn get_core_count() -> i32 {
+    let mut sys = System::new();
+
+    sys.refresh_cpu();
+    sys.cpus().len() as i32
+}
+
+#[tauri::command]
+pub fn get_gauge_types() -> (Vec<String>, Vec<String>) {
+    let mut name = vec![];
+    let mut desc = vec![];
+
+    for gauge in Gauge::iter() {
+        name.push(gauge.as_ref().to_string());
+        desc.push(gauge.get_detailed_message().unwrap().to_string());
+    }
+
+    (name, desc)
+}
+
+#[tauri::command]
+pub fn get_netifs() -> Vec<String> {
+    Networks::new_with_refreshed_list()
+        .list()
+        .keys()
+        .cloned()
+        .collect()
 }
 
 #[tauri::command]
@@ -41,40 +76,19 @@ pub fn get_ports() -> Vec<(String, String)> {
 }
 
 #[tauri::command]
+pub fn get_speed_units() -> (Vec<String>, Vec<String>) {
+    let mut name = vec![];
+    let mut desc = vec![];
+
+    for spd in NetworkSpeed::iter() {
+        name.push(spd.as_ref().to_string());
+        desc.push(spd.get_detailed_message().unwrap().to_string());
+    }
+
+    (name, desc)
+}
+
+#[tauri::command]
 pub fn open_config_dir() {
     open::that(ConfigFile::path()).ok();
-}
-
-#[tauri::command]
-pub fn get_gauge_types() -> (Vec<String>, Vec<String>) {
-    let mut message = vec![];
-    let mut detailed_message = vec![];
-
-    for gauge in Gauge::iter() {
-        message.push(gauge.as_ref().to_string());
-        detailed_message.push(gauge.get_detailed_message().unwrap().to_string());
-    }
-    (message, detailed_message)
-}
-
-#[tauri::command]
-pub fn get_core_count() -> i32 {
-    let mut sys = System::new();
-
-    sys.refresh_cpu();
-    sys.cpus().len() as i32
-}
-
-#[tauri::command]
-pub fn get_netifs() -> Vec<String> {
-    Networks::new_with_refreshed_list().list().keys().cloned().collect()
-}
-
-#[tauri::command]
-pub fn get_speed_units() -> Vec<String> {
-    let mut ret = vec![];
-    for spd in NetworkSpeed::iter() {
-        ret.push(spd.as_ref().to_string());
-    }
-    ret
 }

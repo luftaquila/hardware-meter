@@ -14,7 +14,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   await init_event_handler();
 });
 
-async function init_ui () {
+async function init_ui() {
   ch_cnt = await invoke("get_channel_count", {});
 
   document.querySelector("div#channel-conf-area").innerHTML += build_channel_conf(0);
@@ -24,9 +24,9 @@ async function init_ui () {
     document.querySelector("div#channel-conf-area").innerHTML += build_channel_conf(i);
   }
 
-  [ gauges.types, gauges.details] = await invoke("get_gauge_types", {});
+  [gauges.types, gauges.details] = await invoke("get_gauge_types", {});
   let gauge_types = "<option disabled selected value=''>Select gauge type</option>";
-  
+
   for (const [i, item] of gauges.details.entries()) {
     gauge_types += `<option value='${gauges.types[i]}'>${item}</option>`;
   };
@@ -98,14 +98,14 @@ async function config_event_handler(e) {
   let config = validate_ui_config();
 
   if (config) {
-    await invoke("config", config);
+    await invoke("config", { conf: config });
   }
 }
 
 function validate_ui_config() {
   let port = document.querySelector('#device').value;
   let update = document.querySelector('#interval').value;
-  
+
   if (!port || !update) {
     return null;
   }
@@ -124,7 +124,7 @@ function validate_ui_config() {
       case "CpuUsage":
       case "CpuFreq":
         gauge[type] = {
-          core: document.querySelector(`div#channel-conf-ch${i} select.channel-coreid`).value
+          core: Number(document.querySelector(`div#channel-conf-ch${i} select.channel-coreid`).value),
         };
         break;
 
@@ -138,6 +138,7 @@ function validate_ui_config() {
         break;
 
       default:
+        gauge[type] = null;
         break;
     }
 
@@ -147,7 +148,7 @@ function validate_ui_config() {
   return {
     power: power,
     port: port,
-    update: update,
+    update: Number(update),
     active: active_gauges,
   }
 }
@@ -263,7 +264,13 @@ async function build_core_selection() {
 
 async function build_network_selection() {
   const netif_list = await invoke("get_netifs", {});
-  const speed_unit_list = await invoke("get_speed_units", {});
+
+  let speed_unit = {
+    name: [],
+    desc: [],
+  };
+
+  [speed_unit.name, speed_unit.desc] = await invoke("get_speed_units", {});
 
   let html = `<select class='channel-netif config'>
                 <option disabled selected value=''>Select Network</option>`;
@@ -275,8 +282,8 @@ async function build_network_selection() {
   html += `</select><select class='channel-speed config'>`;
   html += `<option disabled selected value=''>Select Speed Unit</option>`;
 
-  for (let i = 0; i < speed_unit_list.length; i++) {
-    html += `<option value='${speed_unit_list[i]}'>${speed_unit_list[i]}</option>`;
+  for (let i = 0; i < speed_unit.name.length; i++) {
+    html += `<option value='${speed_unit.name[i]}'>${speed_unit.desc[i]}</option>`;
   }
 
   html += `</select>`;

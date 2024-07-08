@@ -35,7 +35,7 @@
   cursor: default;
 }
 
-/* basic element configurations ***********************************************/
+/* basic element configurations */
 .container {
   margin: 0;
   display: flex;
@@ -101,7 +101,7 @@ select {
   cursor: pointer;
 }
 
-/* per item configurations ****************************************************/
+/* per item configurations */
 button#power {
   width: 9em;
   background-color: #202020;
@@ -131,7 +131,7 @@ select#device {
   margin-right: 1em;
 }
 
-/* channel selectors **********************************************************/
+/* channel selectors */
 table#channel-list {
   max-width: 50em;
   min-width: 700px;
@@ -209,7 +209,7 @@ table#channel-list td:active {
   background-color: #282828;
 }
 
-/* channel configurators ******************************************************/
+/* channel configurators */
 div.channel-conf {
   margin-top: 1em;
   display: flex;
@@ -250,4 +250,3 @@ input.channel-active {
   cursor: pointer;
   zoom: 1.5;
 }
-

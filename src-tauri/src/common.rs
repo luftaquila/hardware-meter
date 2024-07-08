@@ -10,66 +10,66 @@ use strum_macros::{AsRefStr, EnumIter, EnumMessage};
 
 pub const MAX_CHANNEL: i32 = 6;
 
-#[derive(Clone, Copy, Default, AsRefStr, EnumIter, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, AsRefStr, EnumIter, EnumMessage, Serialize, Deserialize, Debug)]
 pub enum NetworkSpeed {
-    #[strum(serialize = "1 Mbps")]
+    #[strum(detailed_message = "1 Mbps")]
     Mbps1 = 1,
-    #[strum(serialize = "5 Mbps")]
+    #[strum(detailed_message = "5 Mbps")]
     Mbps5 = 5,
-    #[strum(serialize = "10 Mbps")]
+    #[strum(detailed_message = "10 Mbps")]
     Mbps10 = 10,
-    #[strum(serialize = "50 Mbps")]
+    #[strum(detailed_message = "50 Mbps")]
     Mbps50 = 50,
     #[default]
-    #[strum(serialize = "100 Mbps")]
+    #[strum(detailed_message = "100 Mbps")]
     Mbps100,
-    #[strum(serialize = "500 Mbps")]
+    #[strum(detailed_message = "500 Mbps")]
     Mbps500 = 500,
-    #[strum(serialize = "1 Gbps")]
+    #[strum(detailed_message = "1 Gbps")]
     Gbps1 = 1000,
-    #[strum(serialize = "5 Gbps")]
+    #[strum(detailed_message = "5 Gbps")]
     Gbps5 = 5000,
 }
 
-#[derive(AsRefStr, EnumIter, EnumMessage, Serialize, Deserialize)]
+#[derive(AsRefStr, EnumIter, EnumMessage, Serialize, Deserialize, Debug)]
 pub enum Gauge {
-    #[strum(message = "CpuUsage", detailed_message = "CPU Utilization")]
+    #[strum(detailed_message = "CPU Utilization")]
     CpuUsage { core: i32 },
-    #[strum(message = "CpuFreq", detailed_message = "CPU Frequency")]
+    #[strum(detailed_message = "CPU Frequency")]
     CpuFreq { core: i32 },
-    #[strum(message = "CpuTemp", detailed_message = "CPU Temperature")]
+    #[strum(detailed_message = "CPU Temperature")]
     CpuTemp,
 
-    #[strum(message = "MemoryUsage", detailed_message = "Memory Usage")]
+    #[strum(detailed_message = "Memory Usage")]
     MemoryUsage,
-    #[strum(message = "SwapUsage", detailed_message = "Swap Usage")]
+    #[strum(detailed_message = "Swap Usage")]
     SwapUsage,
 
-    #[strum(message = "NetTx", detailed_message = "Network Transmit Speed")]
+    #[strum(detailed_message = "Network Transmit Speed")]
     NetTx { netif: String, unit: NetworkSpeed },
-    #[strum(message = "NetRx", detailed_message = "Network Receive Speed")]
+    #[strum(detailed_message = "Network Receive Speed")]
     NetRx { netif: String, unit: NetworkSpeed },
-    #[strum(message = "NetTxRx", detailed_message = "Network Receive & Transmit Speed")]
+    #[strum(detailed_message = "Network Receive & Transmit Speed")]
     NetTxRx { netif: String, unit: NetworkSpeed },
 
-    #[strum(message = "DiskUsage", detailed_message = "Disk Usage")]
+    #[strum(detailed_message = "Disk Usage")]
     DiskUsage { name: String },
-    #[strum(message = "DiskTx", detailed_message = "Disk Write Speed")]
+    #[strum(detailed_message = "Disk Write Speed")]
     DiskTx { name: String },
-    #[strum(message = "DiskRx", detailed_message = "Disk Read Speed")]
+    #[strum(detailed_message = "Disk Read Speed")]
     DiskRx { name: String },
-    #[strum(message = "DiskTxRx", detailed_message = "Disk Read & Write Speed")]
+    #[strum(detailed_message = "Disk Read & Write Speed")]
     DiskTxRx { name: String },
 
-    #[strum(message = "GpuUsage", detailed_message = "GPU Utilization")]
+    #[strum(detailed_message = "GPU Utilization")]
     GpuUsage { id: i32 },
-    #[strum(message = "GpuFreq", detailed_message = "GPU Core Frequency")]
+    #[strum(detailed_message = "GPU Core Frequency")]
     GpuFreq { id: i32 },
-    #[strum(message = "GpuTemp", detailed_message = "GPU Temperature")]
+    #[strum(detailed_message = "GPU Temperature")]
     GpuTemp { id: i32 },
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ConfigFile {
     pub power: bool,
     pub port: String,
