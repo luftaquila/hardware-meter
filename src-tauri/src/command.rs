@@ -1,4 +1,4 @@
-use strum::IntoEnumIterator;
+use strum::{EnumMessage, IntoEnumIterator};
 use sysinfo::{Networks, System};
 
 use crate::common::{ConfigFile, Gauge, NetworkSpeed, MAX_CHANNEL};
@@ -9,45 +9,34 @@ pub fn get_channel_count() -> i32 {
 }
 
 #[tauri::command]
-pub fn get_ports() -> String {
+pub fn get_ports() -> Vec<(String, String)> {
+    let mut ret = vec![];
+
     match serialport::available_ports() {
         Ok(ports) => {
-            let mut html = String::from("<option disabled selected>Select serial port</option>");
             for p in ports {
                 if let serialport::SerialPortType::UsbPort(ref usb) = p.port_type {
                     #[cfg(target_os = "windows")]
                     if let Some(ref product) = usb.product {
-                        html.push_str(&format!(
-                            "<option value='{}'>{}</option>",
-                            p.port_name, &product
-                        ));
+                        ret.push((p.port_name, product.clone()));
                     } else {
-                        html.push_str(&format!(
-                            "<option value='{}'>{}</option>",
-                            p.port_name, p.port_name
-                        ));
+                        ret.push((p.port_name.clone(), p.port_name));
                     }
 
                     #[cfg(any(target_os = "macos", target_os = "linux"))]
                     if p.port_name.contains("cu") {
                         if let Some(ref product) = usb.product {
-                            html.push_str(&format!(
-                                "<option value='{}'>{} ({})</option>",
-                                p.port_name, &product, p.port_name
-                            ));
+                            ret.push((p.port_name, &format!("{} ({})", &product, p.port_name)));
                         } else {
-                            html.push_str(&format!(
-                                "<option value='{}'>{}</option>",
-                                p.port_name, p.port_name
-                            ));
+                            ret.push((p.port_name, p.port_name));
                         }
                     }
                 }
             }
 
-            html
+            ret
         }
-        Err(_) => String::from("<option disabled selected>No ports found!</option>"),
+        Err(_) => ret,
     }
 }
 
@@ -57,12 +46,15 @@ pub fn open_config_dir() {
 }
 
 #[tauri::command]
-pub fn get_gauge_types() -> Vec<String> {
-    let mut ret = vec![];
+pub fn get_gauge_types() -> (Vec<String>, Vec<String>) {
+    let mut message = vec![];
+    let mut detailed_message = vec![];
+
     for gauge in Gauge::iter() {
-        ret.push(gauge.as_ref().to_string());
+        message.push(gauge.as_ref().to_string());
+        detailed_message.push(gauge.get_detailed_message().unwrap().to_string());
     }
-    ret
+    (message, detailed_message)
 }
 
 #[tauri::command]

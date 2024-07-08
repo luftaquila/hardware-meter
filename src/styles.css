@@ -103,6 +103,7 @@ select {
 
 /* per item configurations ****************************************************/
 button#power {
+  width: 9em;
   background-color: #202020;
   transition: 0.5s;
   filter: drop-shadow(0 0 0.7em #00ff0090);

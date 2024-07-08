@@ -6,11 +6,11 @@ use std::{
 
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
-use strum_macros::{AsRefStr, EnumIter};
+use strum_macros::{AsRefStr, EnumIter, EnumMessage};
 
-pub const MAX_CHANNEL:i32 = 6;
+pub const MAX_CHANNEL: i32 = 6;
 
-#[derive(Clone, Copy, Default, EnumIter, AsRefStr, Serialize, Deserialize)]
+#[derive(Clone, Copy, Default, AsRefStr, EnumIter, Serialize, Deserialize)]
 pub enum NetworkSpeed {
     #[strum(serialize = "1 Mbps")]
     Mbps1 = 1,
@@ -31,41 +31,41 @@ pub enum NetworkSpeed {
     Gbps5 = 5000,
 }
 
-#[derive(EnumIter, AsRefStr, Serialize, Deserialize)]
+#[derive(AsRefStr, EnumIter, EnumMessage, Serialize, Deserialize)]
 pub enum Gauge {
-    #[strum(serialize = "CPU Utilization")]
+    #[strum(message = "CpuUsage", detailed_message = "CPU Utilization")]
     CpuUsage { core: i32 },
-    #[strum(serialize = "CPU Frequency")]
+    #[strum(message = "CpuFreq", detailed_message = "CPU Frequency")]
     CpuFreq { core: i32 },
-    #[strum(serialize = "CPU Temperature")]
+    #[strum(message = "CpuTemp", detailed_message = "CPU Temperature")]
     CpuTemp,
 
-    #[strum(serialize = "Memory Usage")]
+    #[strum(message = "MemoryUsage", detailed_message = "Memory Usage")]
     MemoryUsage,
-    #[strum(serialize = "Swap Usage")]
+    #[strum(message = "SwapUsage", detailed_message = "Swap Usage")]
     SwapUsage,
 
-    #[strum(serialize = "Network Transmit Speed")]
+    #[strum(message = "NetTx", detailed_message = "Network Transmit Speed")]
     NetTx { netif: String, unit: NetworkSpeed },
-    #[strum(serialize = "Network Receive Speed")]
+    #[strum(message = "NetRx", detailed_message = "Network Receive Speed")]
     NetRx { netif: String, unit: NetworkSpeed },
-    #[strum(serialize = "Network Receive & Transmit Speed")]
+    #[strum(message = "NetTxRx", detailed_message = "Network Receive & Transmit Speed")]
     NetTxRx { netif: String, unit: NetworkSpeed },
 
-    #[strum(serialize = "Disk Usage")]
+    #[strum(message = "DiskUsage", detailed_message = "Disk Usage")]
     DiskUsage { name: String },
-    #[strum(serialize = "Disk Write Speed")]
+    #[strum(message = "DiskTx", detailed_message = "Disk Write Speed")]
     DiskTx { name: String },
-    #[strum(serialize = "Disk Read Speed")]
+    #[strum(message = "DiskRx", detailed_message = "Disk Read Speed")]
     DiskRx { name: String },
-    #[strum(serialize = "Disk Read & Write Speed")]
+    #[strum(message = "DiskTxRx", detailed_message = "Disk Read & Write Speed")]
     DiskTxRx { name: String },
 
-    #[strum(serialize = "GPU Utilization")]
+    #[strum(message = "GpuUsage", detailed_message = "GPU Utilization")]
     GpuUsage { id: i32 },
-    #[strum(serialize = "GPU Core Frequency")]
+    #[strum(message = "GpuFreq", detailed_message = "GPU Core Frequency")]
     GpuFreq { id: i32 },
-    #[strum(serialize = "GPU Temperature")]
+    #[strum(message = "GpuTemp", detailed_message = "GPU Temperature")]
     GpuTemp { id: i32 },
 }
 
@@ -73,8 +73,8 @@ pub enum Gauge {
 pub struct ConfigFile {
     pub power: bool,
     pub port: String,
-    pub active: Vec<Gauge>,
     pub update: u64,
+    pub active: Vec<Gauge>,
 }
 
 impl ConfigFile {
