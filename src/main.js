@@ -60,10 +60,16 @@ async function init_event_handler() {
     }
 
     // config validation
-    if (validate_channel_config(e.target.closest('div.channel-conf').id)) {
-      console.log('valid');
-      // await invoke("config", {});
+    if (e.target.closest('div.channel-conf')) {
+      // channel-conf section event
+      if (validate_channel_config(e.target.closest('div.channel-conf').id)) {
+        console.log('valid channel-conf');
+      }
+    } else {
+      // device conf event
+      console.log('valid device-conf');
     }
+    // await invoke("config", {});
   });
 
   document.querySelectorAll("td.channel-btn").forEach(x => x.addEventListener("click", e => {
