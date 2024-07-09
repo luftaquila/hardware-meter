@@ -97,7 +97,7 @@ impl ConfigFile {
     }
 
     pub fn path() -> PathBuf {
-        ProjectDirs::from("", "luftaquila", "cpu-meter")
+        ProjectDirs::from("", "luftaquila", "hardware-meter")
             .unwrap()
             .data_local_dir()
             .to_path_buf()
@@ -105,7 +105,7 @@ impl ConfigFile {
     }
 
     pub fn dir() -> PathBuf {
-        ProjectDirs::from("", "luftaquila", "cpu-meter")
+        ProjectDirs::from("", "luftaquila", "hardware-meter")
             .unwrap()
             .data_local_dir()
             .to_path_buf()

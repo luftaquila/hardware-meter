@@ -395,24 +395,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cpu-meter"
-version = "0.0.0"
-dependencies = [
- "directories",
- "notify",
- "notify-debouncer-mini",
- "open 5.2.0",
- "serde",
- "serde_json",
- "serialport",
- "strum",
- "strum_macros",
- "sysinfo",
- "tauri",
- "tauri-build",
-]
-
-[[package]]
 name = "cpufeatures"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1162,6 +1144,24 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "hardware-meter"
+version = "1.0.0"
+dependencies = [
+ "directories",
+ "notify",
+ "notify-debouncer-mini",
+ "open 5.2.0",
+ "serde",
+ "serde_json",
+ "serialport",
+ "strum",
+ "strum_macros",
+ "sysinfo",
+ "tauri",
+ "tauri-build",
 ]
 
 [[package]]

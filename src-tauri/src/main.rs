@@ -80,7 +80,7 @@ fn main() {
             }
             SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
                 "about" => {
-                    open::that("https://github.com/luftaquila/cpu-meter").unwrap();
+                    open::that("https://github.com/luftaquila/hardware-meter").unwrap();
                 }
                 "settings" => {
                     app.get_window("main").unwrap().show().unwrap();

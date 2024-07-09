@@ -66,7 +66,7 @@
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "LUFT-AQUILA"
 #define USBD_PID_FS     0x0500
-#define USBD_PRODUCT_STRING_FS     "cpu-meter"
+#define USBD_PRODUCT_STRING_FS     "hardware-meter"
 #define USBD_CONFIGURATION_STRING_FS     "CDC Config"
 #define USBD_INTERFACE_STRING_FS     "CDC Interface"
 

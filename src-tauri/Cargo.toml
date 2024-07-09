@@ -1,8 +1,10 @@
 [package]
-name = "cpu-meter"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
+name = "hardware-meter"
+version = "1.0.0"
+license = "GPL-3.0-only"
+description = "An analog gauge meter for system information"
+authors = ["luftaquila <mail@luftaquila.io>"]
+repository = "https://github.com/luftaquila/hardware-meter"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
