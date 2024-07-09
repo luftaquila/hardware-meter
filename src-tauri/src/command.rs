@@ -11,6 +11,15 @@ pub fn config(conf: ConfigFile) {
 }
 
 #[tauri::command]
+pub fn get_config() -> Option<ConfigFile> {
+    if let Ok(file) = ConfigFile::from_json() {
+        Some(file)
+    } else {
+        None
+    }
+}
+
+#[tauri::command]
 pub fn get_channel_count() -> i32 {
     MAX_CHANNEL
 }

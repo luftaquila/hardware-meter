@@ -11,6 +11,7 @@ let power = false;
 
 window.addEventListener("DOMContentLoaded", async () => {
   await init_ui();
+  await load_ui_config();
   await init_event_handler();
 });
 
@@ -28,6 +29,10 @@ async function init_ui() {
   let gauge_types = "<option disabled selected value=''>Select gauge type</option>";
 
   for (const [i, item] of gauges.details.entries()) {
+    if (item == "Disabled") {
+      continue;
+    }
+
     gauge_types += `<option value='${gauges.types[i]}'>${item}</option>`;
   };
 
@@ -38,8 +43,114 @@ async function init_ui() {
   document.querySelector("#device").innerHTML = await build_port_selection();
 }
 
+async function load_ui_config() {
+  const config = await invoke("get_config", {});
+
+  if (!config) {
+    return;
+  }
+
+  /* set update rate */
+  document.querySelector('select#interval').value = config.update;
+
+  /* set port */
+  const select = document.querySelector('select#device');
+
+  for (let i = 0; i < select.options.length; i++) {
+    if (select.options[i].value === config.port) {
+      select.selectedIndex = i;
+      break;
+    }
+  }
+
+  /* set channel configs */
+  for (let i = 0; i < ch_cnt; i++) {
+    if (config.gauges[i] === "Disabled") {
+      continue;
+    }
+
+    document.querySelector(`td#ch${i + 1}`).classList.add('active');
+
+    const target = document.querySelector(`div#channel-conf-ch${i + 1}`);
+
+    const active = target.querySelector('input.channel-active')
+    active.disabled = false;
+    active.checked = true;
+
+    const current_type = Object.keys(config.gauges[i])[0];
+    const type = target.querySelector('select.channel-type');
+
+    for (let j = 0; j < type.options.length; j++) {
+      if (type.options[j].value === current_type) {
+        type.selectedIndex = j;
+        target.querySelector('td.channel-detail').innerHTML = await build_channel_detail(current_type);
+
+        switch (current_type) {
+          case "CpuUsage":
+          case "CpuFreq":
+            const coreid = target.querySelector('select.channel-coreid');
+
+            for (let k = 0; k < coreid.options.length; k++) {
+              if (coreid.options[k].value == config.gauges[i][current_type].core) {
+                coreid.selectedIndex = k;
+              }
+            }
+            break;
+
+          case "NetTx":
+          case "NetRx":
+          case "NetTxRx":
+            const netif = target.querySelector('select.channel-netif');
+            const speed = target.querySelector('select.channel-speed');
+
+            for (let k = 0; k < netif.options.length; k++) {
+              if (netif.options[k].value === config.gauges[i][current_type].netif) {
+                netif.selectedIndex = k;
+              }
+            }
+
+            for (let k = 0; k < speed.options.length; k++) {
+              if (speed.options[k].value == config.gauges[i][current_type].unit) {
+                speed.selectedIndex = k;
+              }
+            }
+            break;
+
+          default:
+            return "-";
+        }
+      }
+    }
+  }
+
+
+  /* set master power button */
+  if (config.power && document.querySelector('select#device').value) {
+    power = true;
+
+    const powerbtn = document.querySelector("button#power");
+    powerbtn.classList.add("active");
+    powerbtn.innerText = "DEACTIVATE";
+  }
+}
+
 async function init_event_handler() {
   document.querySelector("#refresh-port").addEventListener("click", async e => {
+    /* deactivate device */
+    if (power) {
+      power = false;
+
+      const powerbtn = document.querySelector("button#power");
+      powerbtn.classList.remove("active");
+      powerbtn.innerText = "ACTIVATE";
+
+      let config = validate_ui_config();
+
+      if (config) {
+        await invoke("config", { conf: config });
+      }
+    }
+
     document.querySelector("#device").innerHTML = await build_port_selection();
   });
 
@@ -50,6 +161,10 @@ async function init_event_handler() {
   const powerbtn = document.querySelector("button#power");
 
   powerbtn.addEventListener("click", async e => {
+    if (!validate_ui_config()) {
+      return;
+    }
+
     power = !power;
     powerbtn.classList.toggle("active");
     powerbtn.innerText = powerbtn.innerText === "ACTIVATE" ? "DEACTIVATE" : "ACTIVATE";
@@ -63,10 +178,10 @@ async function init_event_handler() {
 
   document.querySelectorAll("td.channel-btn").forEach(x => x.addEventListener("click", e => {
     document.querySelectorAll("td.channel-btn.selected").forEach(x => x.classList.remove('selected'));
-    e.srcElement.classList.add("selected");
+    e.target.classList.add("selected");
 
     document.querySelectorAll("div.channel-conf:not(.hidden)").forEach(d => d.classList.add('hidden'));
-    document.querySelector(`#channel-conf-${e.srcElement.id}`).classList.remove("hidden");
+    document.querySelector(`#channel-conf-${e.target.id}`).classList.remove("hidden");
   }));
 }
 
@@ -110,10 +225,11 @@ function validate_ui_config() {
     return null;
   }
 
-  let active_gauges = [];
+  let gauges = [];
 
   for (let i = 1; i <= ch_cnt; i++) {
     if (!document.querySelector(`div#channel-conf-ch${i} input.channel-active`).checked) {
+      gauges.push({ Disabled: null });
       continue;
     }
 
@@ -142,14 +258,14 @@ function validate_ui_config() {
         break;
     }
 
-    active_gauges.push(gauge);
+    gauges.push(gauge);
   }
 
   return {
     power: power,
     port: port,
     update: Number(update),
-    active: active_gauges,
+    gauges: gauges,
   }
 }
 

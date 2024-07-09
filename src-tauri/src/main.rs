@@ -13,8 +13,8 @@ use tauri::{CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemT
 
 use crate::{
     command::{
-        config, get_channel_count, get_core_count, get_gauge_types, get_netifs, get_ports,
-        get_speed_units, open_config_dir,
+        config, get_channel_count, get_config, get_core_count, get_gauge_types, get_netifs,
+        get_ports, get_speed_units, open_config_dir,
     },
     common::ConfigFile,
     serial::serial_thread,
@@ -101,6 +101,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             config,
+            get_config,
             get_core_count,
             get_channel_count,
             get_gauge_types,

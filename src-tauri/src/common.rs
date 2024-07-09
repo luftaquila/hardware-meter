@@ -33,6 +33,9 @@ pub enum NetworkSpeed {
 
 #[derive(AsRefStr, EnumIter, EnumMessage, Serialize, Deserialize, Debug)]
 pub enum Gauge {
+    #[strum(detailed_message = "Disabled")]
+    Disabled,
+
     #[strum(detailed_message = "CPU Utilization")]
     CpuUsage { core: i32 },
     #[strum(detailed_message = "CPU Frequency")]
@@ -74,7 +77,7 @@ pub struct ConfigFile {
     pub power: bool,
     pub port: String,
     pub update: u64,
-    pub active: Vec<Gauge>,
+    pub gauges: Vec<Gauge>,
 }
 
 impl ConfigFile {

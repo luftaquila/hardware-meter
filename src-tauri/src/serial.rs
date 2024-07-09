@@ -10,7 +10,7 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
     let mut current = ConfigFile {
         power: false,
         port: String::new(),
-        active: vec![],
+        gauges: vec![],
         update: 200, // default delay value
     };
 
@@ -23,6 +23,7 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
 
         match rx.try_recv() {
             Ok(config) => {
+                println!("config: {config:?}");
                 current = config;
 
                 // close previous port
@@ -58,8 +59,9 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
             sys.refresh_memory();
             networks.refresh();
 
-            for (i, gauge) in current.active.iter().enumerate() {
+            for (i, gauge) in current.gauges.iter().enumerate() {
                 match gauge {
+                    Gauge::Disabled => {}
                     Gauge::CpuUsage { core } => {
                         if *core == -1 {
                             packet = sys.global_cpu_info().cpu_usage().to_le_bytes();
@@ -150,6 +152,7 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
                 packet[0] = i as u8;
 
                 // transmit packet
+                println!("packet sent: {:?}", packet);
                 if let Err(_) = port.write(&packet) {
                     result = false;
                 }
