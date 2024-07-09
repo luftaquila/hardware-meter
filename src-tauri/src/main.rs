@@ -4,7 +4,7 @@ mod command;
 mod common;
 mod serial;
 
-use std::{sync::mpsc, thread};
+use std::{fs, sync::mpsc, thread};
 
 use notify::RecursiveMode;
 use notify_debouncer_mini::new_debouncer;
@@ -25,6 +25,8 @@ fn main() {
     let (tx, rx) = mpsc::channel();
 
     /* create config file monitor */
+    fs::create_dir_all(ConfigFile::dir()).unwrap();
+
     let ctx = tx.clone();
     let (etx, erx) = mpsc::channel();
     let mut debouncer = new_debouncer(std::time::Duration::from_millis(100), etx).unwrap();
