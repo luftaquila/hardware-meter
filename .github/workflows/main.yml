@@ -59,12 +59,12 @@ jobs:
           mv build.hardware-meter-windows/hardware-meter.exe hardware-meter-windows.exe
           mv build.hardware-meter-macos/hardware-meter hardware-meter-macos
           mv build.hardware-meter-linux/hardware-meter hardware-meter-linux
-      - id: changes
-        uses: simbo/changes-between-tags-action@v1
+      # - id: changes
+      #   uses: simbo/changes-between-tags-action@v1
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           artifacts: "hardware-meter-windows.exe,hardware-meter-macos,hardware-meter-linux"
           commit: ${{ github.sha }}
           tag: ${{ github.ref_name }}
-          body: ${{ steps.changes.outputs.changes }}
+          # body: ${{ steps.changes.outputs.changes }}
