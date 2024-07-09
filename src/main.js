@@ -191,10 +191,8 @@ async function config_event_handler(e) {
   }
 
   if (e.target.matches('.channel-active')) {
-    if (e.target.checked) {
-      const target = e.target.closest('div.channel-conf').id.replace("channel-conf-", '');
-      document.querySelector(`#${target}`).classList.add('active');
-    }
+    const target = e.target.closest('div.channel-conf').id.replace("channel-conf-", '');
+    document.querySelector(`#${target}`).classList.toggle('active');
   }
 
   // set channel detailed configuration ui
@@ -269,17 +267,25 @@ function validate_ui_config() {
   }
 }
 
-function validate_channel_config(id) {
+async function validate_channel_config(id) {
   const target = document.querySelector(`#${id}`);
+  const active = target.querySelector(`input.channel-active`);
 
   /* enable active checkbox if others are valid */
   switch (target.querySelector(`select.channel-type`).value) {
     case "CpuUsage":
     case "CpuFreq":
       if (target.querySelector(`select.channel-coreid`).value) {
-        target.querySelector(`input.channel-active`).disabled = false;
+        active.disabled = false;
       } else {
-        target.querySelector(`input.channel-active`).disabled = true;
+        active.checked = false;
+        active.disabled = true;
+
+        let config = validate_ui_config();
+
+        if (config) {
+          await invoke("config", { conf: config });
+        }
         return false;
       }
       break;
@@ -288,20 +294,23 @@ function validate_channel_config(id) {
     case "NetRx":
     case "NetTxRx":
       if (target.querySelector(`select.channel-netif`).value && target.querySelector(`select.channel-speed`).value) {
-        target.querySelector(`input.channel-active`).disabled = false;
+        active.disabled = false;
       } else {
-        target.querySelector(`input.channel-active`).disabled = true;
+        active.checked = false;
+        active.disabled = true;
+
+        let config = validate_ui_config();
+
+        if (config) {
+          await invoke("config", { conf: config });
+        }
         return false;
       }
       break;
 
     default:
-      target.querySelector(`input.channel-active`).disabled = false;
+      active.disabled = false;
       break;
-  }
-
-  if (!target.querySelector(`input.channel-active`).checked) {
-    return false;
   }
 
   return true;

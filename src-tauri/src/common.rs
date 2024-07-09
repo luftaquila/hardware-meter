@@ -22,7 +22,7 @@ pub enum NetworkSpeed {
     Mbps50 = 50,
     #[default]
     #[strum(detailed_message = "100 Mbps")]
-    Mbps100,
+    Mbps100 = 100,
     #[strum(detailed_message = "500 Mbps")]
     Mbps500 = 500,
     #[strum(detailed_message = "1 Gbps")]

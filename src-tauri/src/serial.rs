@@ -23,7 +23,6 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
 
         match rx.try_recv() {
             Ok(config) => {
-                println!("config: {config:?}");
                 current = config;
 
                 // close previous port
@@ -48,6 +47,10 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
             }
         }
 
+        if !current.power {
+            continue;
+        }
+
         /* send active gauges to serial port */
         if let Some(ref mut port) = serial {
             #[allow(unused_assignments)]
@@ -61,7 +64,9 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
 
             for (i, gauge) in current.gauges.iter().enumerate() {
                 match gauge {
-                    Gauge::Disabled => {}
+                    Gauge::Disabled => {
+                        continue;
+                    }
                     Gauge::CpuUsage { core } => {
                         if *core == -1 {
                             packet = sys.global_cpu_info().cpu_usage().to_le_bytes();
@@ -152,7 +157,6 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
                 packet[0] = i as u8;
 
                 // transmit packet
-                println!("packet sent: {:?}", packet);
                 if let Err(_) = port.write(&packet) {
                     result = false;
                 }
