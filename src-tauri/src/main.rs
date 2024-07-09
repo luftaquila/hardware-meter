@@ -44,7 +44,7 @@ fn main() {
                         }
                     }
                 }),
-                Err(e) => {
+                Err(_e) => {
                     // !TODO: error handling
                 }
             }

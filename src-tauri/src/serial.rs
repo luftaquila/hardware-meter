@@ -37,7 +37,7 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
                     .open()
                 {
                     Ok(p) => Some(p),
-                    Err(e) => None, // !TODO: error dialog
+                    Err(_e) => None, // !TODO: error dialog
                 };
             }
             Err(mpsc::TryRecvError::Empty) => {} // do nothing
@@ -49,7 +49,9 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
 
         /* send active gauges to serial port */
         if let Some(ref mut port) = serial {
+            #[allow(unused_assignments)]
             let mut packet = [0; 4];
+
             let mut result = true;
 
             sys.refresh_cpu();
@@ -121,25 +123,25 @@ pub fn serial_thread(rx: Receiver<ConfigFile>) {
                             packet = [0; 4];
                         }
                     }
-                    Gauge::DiskUsage { name } => {
+                    Gauge::DiskUsage { name: _ } => {
                         packet = [0; 4]; // !TODO
                     }
-                    Gauge::DiskTx { name } => {
+                    Gauge::DiskTx { name: _ } => {
                         packet = [0; 4]; // !TODO
                     }
-                    Gauge::DiskRx { name } => {
+                    Gauge::DiskRx { name: _ } => {
                         packet = [0; 4]; // !TODO
                     }
-                    Gauge::DiskTxRx { name } => {
+                    Gauge::DiskTxRx { name: _ } => {
                         packet = [0; 4]; // !TODO
                     }
-                    Gauge::GpuUsage { id } => {
+                    Gauge::GpuUsage { id: _ } => {
                         packet = [0; 4]; // !TODO
                     }
-                    Gauge::GpuFreq { id } => {
+                    Gauge::GpuFreq { id: _ } => {
                         packet = [0; 4]; // !TODO
                     }
-                    Gauge::GpuTemp { id } => {
+                    Gauge::GpuTemp { id: _ } => {
                         packet = [0; 4]; // !TODO
                     }
                 }
