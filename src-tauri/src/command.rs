@@ -72,9 +72,12 @@ pub fn get_ports() -> Vec<(String, String)> {
                     #[cfg(any(target_os = "macos", target_os = "linux"))]
                     if p.port_name.contains("cu") {
                         if let Some(ref product) = usb.product {
-                            ret.push((p.port_name, &format!("{} ({})", &product, p.port_name)));
+                            ret.push((
+                                p.port_name.clone(),
+                                format!("{} ({})", &product, p.port_name),
+                            ));
                         } else {
-                            ret.push((p.port_name, p.port_name));
+                            ret.push((p.port_name.clone(), p.port_name));
                         }
                     }
                 }

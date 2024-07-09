@@ -5,8 +5,8 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "cpu-meter",
-    "version": "0.0.0"
+    "productName": "hardware-meter",
+    "version": "1.0.0"
   },
   "tauri": {
     "allowlist": {
@@ -18,7 +18,7 @@
     },
     "windows": [
       {
-        "title": "cpu-meter",
+        "title": "hardware-meter",
         "width": 800,
         "height": 600,
         "visible": false
@@ -30,7 +30,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "luftaquila.cpu-meter",
+      "identifier": "luftaquila.hardware-meter",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
