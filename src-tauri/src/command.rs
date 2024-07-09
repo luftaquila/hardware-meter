@@ -5,7 +5,9 @@ use crate::common::{ConfigFile, Gauge, NetworkSpeed, MAX_CHANNEL};
 
 #[tauri::command]
 pub fn config(conf: ConfigFile) {
-    println!("{:?}", conf);
+    if let Err(e) = conf.to_json() {
+        // !TODO: error handling
+    }
 }
 
 #[tauri::command]

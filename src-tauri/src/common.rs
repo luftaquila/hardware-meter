@@ -81,7 +81,7 @@ impl ConfigFile {
     pub fn to_json(&self) -> Result<(), Error> {
         let mut file = fs::File::create(ConfigFile::path())?;
 
-        let serialized = serde_json::to_string(self)?;
+        let serialized = serde_json::to_string_pretty(self)?;
         file.write_all(serialized.as_bytes())?;
 
         Ok(())
@@ -99,6 +99,13 @@ impl ConfigFile {
             .data_local_dir()
             .to_path_buf()
             .join("config.json")
+    }
+
+    pub fn dir() -> PathBuf {
+        ProjectDirs::from("", "luftaquila", "cpu-meter")
+            .unwrap()
+            .data_local_dir()
+            .to_path_buf()
     }
 }
 
