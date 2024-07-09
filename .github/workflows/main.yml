@@ -15,34 +15,38 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-    - run: cargo build --release
+    - run: cargo install tauri-cli
+    - run: cargo tauri build
     - uses: actions/upload-artifact@v4
       with:
-        name: build.cpu-meter-windows
-        path: target/release/cpu-meter.exe
+        name: build.hardware-meter-windows
+        path: src-tauri/target/release/hardware-meter.exe
 
   build-macos:
     name: Build macOS
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
-    - run: cargo build --release
+    - run: cargo install tauri-cli
+    - run: cargo tauri build
     - uses: actions/upload-artifact@v4
       with:
-        name: build.cpu-meter-macos
-        path: target/release/cpu-meter
+        name: build.hardware-meter-macos
+        path: src-tauri/target/release/hardware-meter
 
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: sudo apt-get install -y libudev-dev libdbus-1-dev
-    - run: cargo build --release
+    - run: sudo apt-get update
+    - run: sudo apt-get install -y libudev-dev libdbus-1-dev libwebkit2gtk-4.0-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+    - run: cargo install tauri-cli
+    - run: cargo tauri build
     - uses: actions/upload-artifact@v4
       with:
-        name: build.cpu-meter-linux
-        path: target/release/cpu-meter
+        name: build.hardware-meter-linux
+        path: src-tauri/target/release/hardware-meter
 
   release:
     name: release
@@ -52,15 +56,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
       - run: |
-          mv build.cpu-meter-windows/cpu-meter.exe cpu-meter-windows.exe
-          mv build.cpu-meter-macos/cpu-meter cpu-meter-macos
-          mv build.cpu-meter-linux/cpu-meter cpu-meter-linux
+          mv build.hardware-meter-windows/hardware-meter.exe hardware-meter-windows.exe
+          mv build.hardware-meter-macos/hardware-meter hardware-meter-macos
+          mv build.hardware-meter-linux/hardware-meter hardware-meter-linux
       - id: changes
         uses: simbo/changes-between-tags-action@v1
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          artifacts: "cpu-meter-windows.exe,cpu-meter-macos,cpu-meter-linux"
+          artifacts: "hardware-meter-windows.exe,hardware-meter-macos,hardware-meter-linux"
           commit: ${{ github.sha }}
           tag: ${{ github.ref_name }}
           body: ${{ steps.changes.outputs.changes }}
