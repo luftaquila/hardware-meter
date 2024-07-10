@@ -77,7 +77,7 @@ async function load_ui_config() {
     active.disabled = false;
     active.checked = true;
 
-    const current_type = Object.keys(config.gauges[i])[0];
+    const current_type = typeof(config.gauges[i]) === "string" ? config.gauges[i] : Object.keys(config.gauges[i])[0];
     const type = target.querySelector('select.channel-type');
 
     for (let j = 0; j < type.options.length; j++) {
